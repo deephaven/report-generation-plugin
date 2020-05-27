@@ -1,0 +1,114 @@
+import io.deephaven.gradle.tools.Deps
+import io.deephaven.gradle.tools.Repos
+
+buildscript {
+	repositories {
+		maven {
+			credentials {
+				username = artifactoryUser
+				password = artifactoryAPIKey
+			}
+			url new URI('https://illumon.jfrog.io/illumon/plugin-tools')
+		}
+		dependencies {
+			classpath 'io.deephaven.gradle:plugins:1.20200123.006'
+		}
+	}
+}
+
+plugins {
+	id 'java-library'
+	id 'groovy'
+	id 'idea'
+	id 'com.diffplug.gradle.spotless' version '4.1.0'
+}
+
+apply plugin: 'io.deephaven.plugins'
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_1_8
+	targetCompatibility = JavaVersion.VERSION_1_8
+	withJavadocJar()
+	withSourcesJar()
+}
+
+deephaven {
+	pluginName = project.name
+	// todo: some way to mark plugin as alpha, beta, etc.?
+}
+
+Repos.irisRepo(project)
+
+group = project.property('pluginGroup')
+version = project.property('pluginVersion')
+
+repositories {
+	jcenter()
+}
+
+configurations {
+	global
+	local
+	client
+	auth
+}
+
+dependencies {
+	api Deps.iris('DB')
+	api Deps.iris('Plot')
+	api 'org.apache.commons:commons-email:1.4'
+
+	annotationProcessor 'org.immutables:value:2.8.8'
+	compileOnly 'org.immutables:value-annotations:2.8.8'
+
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
+	testImplementation 'org.assertj:assertj-core:3.16.1'
+	testImplementation 'org.mockito:mockito-junit-jupiter:3.3.3'
+}
+
+tasks.withType(JavaCompile) {
+	// https://github.com/immutables/immutables/issues/804
+	options.compilerArgs.add('-Aimmutables.gradle.incremental')
+	options.compilerArgs.add('-Xlint:all')
+	// https://github.com/immutables/immutables/issues/672
+	options.compilerArgs.add('-Xlint:-processing')
+	options.compilerArgs.add('-Werror')
+}
+
+test {
+	useJUnitPlatform()
+}
+
+wrapper {
+	gradleVersion = '6.5.0'
+	distributionType = 'ALL'
+}
+
+idea {
+	module {
+		downloadJavadoc = true
+		downloadSources = true
+	}
+}
+
+spotless {
+	java {
+		googleJavaFormat()
+		licenseHeaderFile 'license-header.java'
+	}
+	groovy {
+		greclipse()
+		licenseHeaderFile 'license-header.java'
+	}
+	groovyGradle {
+		greclipse()
+	}
+	// this appears to be crashing the gradle daemon on occasion
+	//format 'styling', {
+	//	target '**/*.css'
+	//	prettier().config(['parser': 'postcss'])
+	//}
+}
+
+check.dependsOn(':spotlessCheck')

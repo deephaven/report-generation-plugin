@@ -1,0 +1,36 @@
+table {
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+  border-color: #c0bfbf;
+  margin: 5px 0;
+}
+
+table tbody td,
+table thead th {
+  padding: 2px;
+}
+
+table thead th {
+  background-color: #3a658a;
+  color: #fcfcfa;
+}
+
+table tbody tr:nth-child(even) {
+  background-color: #f0f0ee;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #3a658a;
+  margin-top: 5px;
+  margin-bottom: 0;
+}
+
+ul {
+  padding-top: 5px;
+  padding-bottom: 10px;
+}
