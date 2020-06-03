@@ -15,20 +15,58 @@
  */
 package io.deephaven.plugins.email;
 
+import com.fishlib.io.logger.Logger;
+import com.illumon.iris.db.tables.live.LiveTableMonitor;
+import com.illumon.util.FunctionalInterfaces.ThrowingSupplier;
 import io.deephaven.plugins.report.Report;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.time.Duration;
 import java.util.List;
-import org.apache.commons.mail.EmailException;
+import java.util.stream.Collectors;
+import org.apache.commons.mail.ImageHtmlEmail;
 import org.immutables.value.Value.Check;
 import org.immutables.value.Value.Default;
 import org.immutables.value.Value.Immutable;
 
 /** The full configuration object related to sending report-based emails. */
-@Immutable
+@Immutable(builder = true, copy = true)
 public abstract class EmailSendingConfig {
+
+  /** The lock type. */
+  public enum LockType {
+    /** Do not acquire a lock to render the email. */
+    NONE {
+      @Override
+      ImageHtmlEmail render(InlineHtmlRenderer renderer) throws Exception {
+        return renderer.render();
+      }
+    },
+
+    /** Acquire a {@link LiveTableMonitor#sharedLock()} to render the email. */
+    SHARED {
+      @Override
+      ImageHtmlEmail render(InlineHtmlRenderer renderer) throws Exception {
+        return LiveTableMonitor.DEFAULT
+            .sharedLock()
+            .computeLocked((ThrowingSupplier<ImageHtmlEmail, Exception>) renderer::render);
+      }
+    },
+
+    /** Acquire an {@link LiveTableMonitor#exclusiveLock()} ()} to render the email. */
+    EXCLUSIVE {
+      @Override
+      ImageHtmlEmail render(InlineHtmlRenderer renderer) throws Exception {
+        return LiveTableMonitor.DEFAULT
+            .exclusiveLock()
+            .computeLocked((ThrowingSupplier<ImageHtmlEmail, Exception>) renderer::render);
+      }
+    };
+
+    abstract ImageHtmlEmail render(InlineHtmlRenderer renderer) throws Exception;
+  }
 
   /** The builder. */
   public static class Builder extends ImmutableEmailSendingConfig.Builder {}
@@ -91,13 +129,53 @@ public abstract class EmailSendingConfig {
    */
   public abstract List<Report> reports();
 
+  /**
+   * The lock type. Defaults to {@link LockType#SHARED}.
+   *
+   * @return the lock type
+   */
+  @Default
+  public LockType lockType() {
+    return LockType.SHARED;
+  }
+
+  /**
+   * The timeout. Defaults to {@code Duration.ofSeconds(5)}.
+   *
+   * @return the timeout
+   */
+  @Default
+  public Duration timeout() {
+    return Duration.ofSeconds(5);
+  }
+
+  /**
+   * Creates a copy of this config but with the new value for {@link #lockType()}.
+   *
+   * @param lockType the lock type
+   * @return the new instance
+   */
+  public abstract EmailSendingConfig withLockType(LockType lockType);
+
+  /**
+   * Creates a copy of this config but with the new value for {@link #timeout()}.
+   *
+   * @param timeout the timeout
+   * @return the new instance
+   */
+  public abstract EmailSendingConfig withTimeout(Duration timeout);
+
   /** Renders and sends the reports-based email. */
-  public final void send() {
-    try {
-      new InlineHtmlRenderer(this).render().send();
-    } catch (EmailException e) {
-      throw new RuntimeException(e);
-    }
+  public final void send() throws Exception {
+    final EmailSendingConfig local =
+        EmailSendingConfig.builder()
+            .from(this)
+            .reports(
+                reports().stream()
+                    .map(r -> r.toLocal(Logger.NULL, timeout()))
+                    .collect(Collectors.toList()))
+            .build();
+    lockType().render(new InlineHtmlRenderer(local)).send();
   }
 
   @Check

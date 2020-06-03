@@ -15,26 +15,16 @@
  */
 package io.deephaven.plugins.report;
 
-/**
- * A reference to a table.
- *
- * @param <Self> the table type
- */
-public interface Table<Self extends Table<Self>> extends Item<Self> {
+public interface Attributes<Self extends Attributes<Self>> extends Iterable<Attribute<?, Self>> {
 
-  /** The visitor-pattern visitor. */
-  interface Visitor {
-    void visit(TableLocal table);
-
-    void visit(TablePQ table);
-  }
+  <T> Attribute<T, Self> attribute(String key, Class<T> clazz);
 
   /**
-   * The visitor-pattern dispatcher.
+   * Creates a new self with the additional attribute.
    *
-   * @param visitor the visitor
-   * @param <V> the visitor type
-   * @return the same visitor
+   * @param key the attribute key
+   * @param value the attribute value
+   * @return the new item
    */
-  <V extends Visitor> V walk(V visitor);
+  Self withAttribute(String key, Object value);
 }

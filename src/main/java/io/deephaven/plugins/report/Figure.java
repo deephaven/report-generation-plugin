@@ -16,35 +16,23 @@
 package io.deephaven.plugins.report;
 
 import io.deephaven.plugins.report.styling.Size2D;
-import org.immutables.value.Value.Immutable;
-import org.immutables.value.Value.Parameter;
 
-/** A figure is an {@link Item} wrapping an underlying {@link com.illumon.iris.db.plot.Figure}. */
-@Immutable
-public abstract class Figure extends ItemBase<Figure> {
+/**
+ * A figure.
+ *
+ * @param <Self> the figure type
+ */
+public interface Figure<Self extends Figure<Self>> extends Item<Self> {
 
-  /**
-   * Constructs a new figure item.
-   *
-   * @param figure the figure
-   * @return the figure item
-   */
-  public static Figure of(com.illumon.iris.db.plot.Figure figure) {
-    return ImmutableFigure.of(figure);
+  /** The visitor-pattern visitor. */
+  interface Visitor {
+    void visit(FigureLocal figure);
+
+    void visit(FigurePQ figure);
   }
-
-  /**
-   * The underlying figure.
-   *
-   * @return the figure
-   */
-  @Parameter
-  public abstract com.illumon.iris.db.plot.Figure figure();
 
   /** @return the {@code size} attribute */
-  public final Attribute<Size2D, Figure> size() {
-    return attribute("size", Size2D.class);
-  }
+  Attribute<Size2D, Self> size();
 
   /**
    * Sets the {@code size} attribute.
@@ -53,18 +41,22 @@ public abstract class Figure extends ItemBase<Figure> {
    * @param height the height
    * @return the new figure
    */
-  public final Figure withSize(int width, int height) {
-    return size().with(Size2D.of(width, height));
-  }
+  Self withSize(int width, int height);
 
-  @Override
-  public final Figure withAttribute(String key, Object value) {
-    return ImmutableFigure.builder().from(this).putAttributes(key, value).build();
-  }
+  /**
+   * Sets the {@code size} attribute.
+   *
+   * @param size the size
+   * @return the new figure
+   */
+  Self withSize(Size2D size);
 
-  @Override
-  public final <V extends Visitor> V walk(V visitor) {
-    visitor.visit(this);
-    return visitor;
-  }
+  /**
+   * The visitor-pattern dispatcher.
+   *
+   * @param visitor the visitor
+   * @param <V> the visitor type
+   * @return the visitor
+   */
+  <V extends Visitor> V walk(V visitor);
 }

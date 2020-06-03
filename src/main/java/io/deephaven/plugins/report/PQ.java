@@ -15,18 +15,14 @@
  */
 package io.deephaven.plugins.report;
 
-/**
- * A reference to a table.
- *
- * @param <Self> the table type
- */
-public interface Table<Self extends Table<Self>> extends Item<Self> {
+/** A reference to a persistent-query */
+public interface PQ {
 
   /** The visitor-pattern visitor. */
   interface Visitor {
-    void visit(TableLocal table);
+    void visit(PQName pq);
 
-    void visit(TablePQ table);
+    void visit(PQSerialId pq);
   }
 
   /**

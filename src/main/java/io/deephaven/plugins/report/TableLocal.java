@@ -16,31 +16,44 @@
 package io.deephaven.plugins.report;
 
 import org.immutables.value.Value.Immutable;
+import org.immutables.value.Value.Parameter;
 
-/** A group is an ordered collection of {@link #items() Items}. */
+/**
+ * This table is an {@link Item} wrapping an underlying {@link com.illumon.iris.db.tables.Table}.
+ */
 @Immutable(builder = true, copy = false)
-public abstract class Group extends ItemBase<Group> {
+public abstract class TableLocal extends TableBase<TableLocal> {
 
-  public static Builder builder() {
-    return new Builder();
+  /**
+   * Constructs a new table item.
+   *
+   * @param table the table
+   * @return the table item
+   */
+  public static TableLocal of(com.illumon.iris.db.tables.Table table) {
+    return ImmutableTableLocal.of(table);
   }
 
-  public static class Builder extends ImmutableGroup.Builder {}
-
-  public abstract java.util.List<Item<?>> items();
+  /**
+   * The underlying table.
+   *
+   * @return the table
+   */
+  @Parameter
+  public abstract com.illumon.iris.db.tables.Table value();
 
   @Override
-  public final Group withAttribute(String key, Object value) {
-    return Group.builder().from(this).putAttributes(key, value).build();
+  public final TableLocal withAttribute(String key, Object value) {
+    return ImmutableTableLocal.builder().from(this).putAttributes(key, value).build();
   }
 
   @Override
-  final Group self() {
+  final TableLocal self() {
     return this;
   }
 
   @Override
-  public final <V extends Visitor> V walk(V visitor) {
+  public final <V extends Table.Visitor> V walk(V visitor) {
     visitor.visit(this);
     return visitor;
   }

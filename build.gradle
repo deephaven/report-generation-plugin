@@ -58,6 +58,8 @@ dependencies {
 	api Deps.iris('Plot')
 	api 'org.apache.commons:commons-email:1.4'
 
+	global 'com.slack.api:slack-api-client:1.0.7'
+
 	annotationProcessor 'org.immutables:value:2.8.8'
 	compileOnly 'org.immutables:value-annotations:2.8.8'
 

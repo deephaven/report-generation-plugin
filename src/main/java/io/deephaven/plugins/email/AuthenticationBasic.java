@@ -19,7 +19,7 @@ import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Parameter;
 
 /** Basic authentication via username and password. */
-@Immutable(builder = false)
+@Immutable
 public abstract class AuthenticationBasic implements Authentication {
 
   /**

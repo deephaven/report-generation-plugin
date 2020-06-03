@@ -13,28 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.deephaven.plugins.report;
+package io.deephaven.plugins.report
 
-/**
- * A reference to a table.
- *
- * @param <Self> the table type
- */
-public interface Table<Self extends Table<Self>> extends Item<Self> {
+import org.junit.jupiter.api.Test
 
-  /** The visitor-pattern visitor. */
-  interface Visitor {
-    void visit(TableLocal table);
+import static org.assertj.core.api.Assertions.assertThat
 
-    void visit(TablePQ table);
-  }
+class PQSerialIdTest {
 
-  /**
-   * The visitor-pattern dispatcher.
-   *
-   * @param visitor the visitor
-   * @param <V> the visitor type
-   * @return the same visitor
-   */
-  <V extends Visitor> V walk(V visitor);
+	private static final PQName PQ_NAME = PQName.of("<owner>", "<name>")
+
+	@Test
+	void pqStatic() {
+		assertThat(Functions.pq("<owner>", "<name>")).isEqualTo(PQ_NAME)
+	}
+
+	@Test
+	void pqNonStatic() {
+		assertThat(Functions.nonStatic().pq("<owner>", "<name>")).isEqualTo(PQ_NAME)
+	}
+
+	@Test
+	void groovyish() {
+		assertThat(PQToGroovyish.toString(PQ_NAME)).isEqualTo("""pq("<owner>", "<name>")""")
+	}
 }

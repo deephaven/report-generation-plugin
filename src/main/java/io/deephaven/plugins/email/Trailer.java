@@ -21,7 +21,7 @@ import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Parameter;
 
 /** The trailer is the final HTML element in the {@code <body>} tag. */
-@Immutable
+@Immutable(builder = true, copy = false)
 public abstract class Trailer {
 
   /**

@@ -13,28 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.deephaven.plugins.report;
+package io.deephaven.plugins.slack;
 
-/**
- * A reference to a table.
- *
- * @param <Self> the table type
- */
-public interface Table<Self extends Table<Self>> extends Item<Self> {
+import io.deephaven.plugins.report.Report;
 
-  /** The visitor-pattern visitor. */
-  interface Visitor {
-    void visit(TableLocal table);
+public interface Client {
 
-    void visit(TablePQ table);
-  }
+  void send(String message);
 
-  /**
-   * The visitor-pattern dispatcher.
-   *
-   * @param visitor the visitor
-   * @param <V> the visitor type
-   * @return the same visitor
-   */
-  <V extends Visitor> V walk(V visitor);
+  void send(Report report);
 }

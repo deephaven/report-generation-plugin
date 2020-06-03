@@ -15,26 +15,29 @@
  */
 package io.deephaven.plugins.report;
 
-/**
- * A reference to a table.
- *
- * @param <Self> the table type
- */
-public interface Table<Self extends Table<Self>> extends Item<Self> {
+import io.deephaven.plugins.report.styling.Size2D;
 
-  /** The visitor-pattern visitor. */
-  interface Visitor {
-    void visit(TableLocal table);
+public abstract class FigureBase<Self extends FigureBase<Self>> extends ItemBase<Self>
+    implements Figure<Self> {
 
-    void visit(TablePQ table);
+  @Override
+  public final Attribute<Size2D, Self> size() {
+    return attribute("size", Size2D.class);
   }
 
-  /**
-   * The visitor-pattern dispatcher.
-   *
-   * @param visitor the visitor
-   * @param <V> the visitor type
-   * @return the same visitor
-   */
-  <V extends Visitor> V walk(V visitor);
+  @Override
+  public final Self withSize(int width, int height) {
+    return withSize(Size2D.of(width, height));
+  }
+
+  @Override
+  public final Self withSize(Size2D size) {
+    return size().with(size);
+  }
+
+  @Override
+  public final <V extends Item.Visitor> V walk(V visitor) {
+    visitor.visit(this);
+    return visitor;
+  }
 }

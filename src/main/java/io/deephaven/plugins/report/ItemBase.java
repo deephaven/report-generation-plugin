@@ -18,22 +18,18 @@ package io.deephaven.plugins.report;
 /**
  * The base implementation.
  *
- * @param <I> the item's self-referential type
+ * @param <Self> the item's self-referential type
  */
-public abstract class ItemBase<I extends ItemBase<I>> implements Item<I> {
+public abstract class ItemBase<Self extends ItemBase<Self>> extends AttributesBase<Self>
+    implements Item<Self> {
 
   @Override
-  public final Attribute<String, I> name() {
+  public final Attribute<String, Self> name() {
     return attribute("name", String.class);
   }
 
   @Override
-  public final <T> Attribute<T, I> attribute(String key, Class<T> clazz) {
-    return ImmutableAttribute.of(this, key, clazz);
-  }
-
-  @Override
-  public final I withName(String name) {
+  public final Self withName(String name) {
     return name().with(name);
   }
 }

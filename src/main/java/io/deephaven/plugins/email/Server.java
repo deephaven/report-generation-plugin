@@ -25,7 +25,7 @@ import org.immutables.value.Value.Immutable;
  *
  * @see Header
  */
-@Immutable
+@Immutable(builder = true, copy = false)
 public abstract class Server {
 
   /** The builder. */
@@ -73,14 +73,6 @@ public abstract class Server {
   public Authentication auth() {
     return AuthenticationNone.INSTANCE;
   }
-
-  /**
-   * Creates a new instance with the given authentication.
-   *
-   * @param authentication the authentication
-   * @return the new server
-   */
-  public abstract Server withAuth(Authentication authentication);
 
   @Check
   final void check() {

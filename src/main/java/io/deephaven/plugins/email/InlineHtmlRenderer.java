@@ -15,16 +15,21 @@
  */
 package io.deephaven.plugins.email;
 
+import com.fishlib.io.logger.Logger;
 import io.deephaven.plugins.report.Figure;
 import io.deephaven.plugins.report.Group;
 import io.deephaven.plugins.report.Item;
 import io.deephaven.plugins.report.Item.Visitor;
 import io.deephaven.plugins.report.Report;
+import io.deephaven.plugins.report.SaveFigure;
 import io.deephaven.plugins.report.Table;
+import io.deephaven.plugins.report.TableLocal;
+import io.deephaven.plugins.report.TablePQ;
 import io.deephaven.plugins.report.Text;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,7 +40,7 @@ import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.ImageHtmlEmail;
 import org.apache.commons.mail.resolver.DataSourceFileResolver;
 
-class InlineHtmlRenderer implements Visitor {
+class InlineHtmlRenderer implements Visitor, Table.Visitor {
 
   private static final String INLINE_CSS =
       Resources.toStringUnchecked(InlineHtmlRenderer.class, "inline.css");
@@ -45,11 +50,17 @@ class InlineHtmlRenderer implements Visitor {
   private final java.util.List<Item<?>> context;
   private int depth;
 
+  private final Logger logger;
+  private final Duration timeout;
+
   InlineHtmlRenderer(EmailSendingConfig reports) {
     this.config = Objects.requireNonNull(reports);
     this.html = new StringBuilder();
     this.context = new ArrayList<>();
     this.depth = 0;
+
+    this.logger = Logger.NULL;
+    this.timeout = Duration.ofSeconds(5); // todo
   }
 
   void header() {
@@ -145,7 +156,7 @@ class InlineHtmlRenderer implements Visitor {
   }
 
   @Override
-  public void visit(Figure figure) {
+  public void visit(Figure<?> figure) {
     startItem(figure);
 
     // todo: could be a bit nicer if figure presented us an inputstream, and we could use a
@@ -159,20 +170,18 @@ class InlineHtmlRenderer implements Visitor {
       throw new UncheckedIOException(e);
     }
 
+    figure.walk(SaveFigure.builder().file(file).log(logger).timeout(timeout).build());
+
     final String absolutePath = file.getAbsolutePath();
 
-    final int timeoutSeconds = 10;
     if (figure.size().isPresent()) {
       final int width = figure.size().get().width();
       final int height = figure.size().get().height();
-      figure.figure().save(absolutePath, width, height, true, timeoutSeconds);
-
       sameLine(
           String.format(
               "<img src=\"%s\" width=\"%d\" height=\"%d\" style=\"display: block;\" />",
               absolutePath, width, height));
     } else {
-      figure.figure().save(absolutePath, true, timeoutSeconds);
       sameLine(String.format("<img src=\"%s\" style=\"display: block;\" />", absolutePath));
     }
 
@@ -193,9 +202,27 @@ class InlineHtmlRenderer implements Visitor {
   }
 
   @Override
-  public void visit(Table table) {
+  public void visit(Table<?> table) {
+    table.walk((Table.Visitor) this);
+  }
+
+  @Override
+  public void visit(TableLocal table) {
     startItem(table);
     sameLine(TableToHtml.html(table.value()));
+    endItem(table);
+  }
+
+  @Override
+  public void visit(TablePQ table) {
+    startItem(table);
+    final TableLocal local;
+    try {
+      local = table.toLocal(logger, timeout);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    sameLine(TableToHtml.html(local.value()));
     endItem(table);
   }
 
@@ -282,12 +309,12 @@ class InlineHtmlRenderer implements Visitor {
     }
 
     @Override
-    public void visit(Table table) {
+    public void visit(Table<?> table) {
       out = "table";
     }
 
     @Override
-    public void visit(Figure figure) {
+    public void visit(Figure<?> figure) {
       out = "figure";
     }
 

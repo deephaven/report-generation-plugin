@@ -15,6 +15,7 @@
  */
 package io.deephaven.plugins.email;
 
+import io.deephaven.plugins.email.EmailSendingConfig.LockType;
 import io.deephaven.plugins.report.Report;
 
 /** A collection of static helper functions to aid in the creation and sending of emails. */
@@ -145,7 +146,7 @@ public class Functions {
    * @param reports the reports to send
    * @see EmailSendingConfig#send()
    */
-  public static void send(Server server, Header header, Report... reports) {
+  public static void send(Server server, Header header, Report... reports) throws Exception {
     email(server, header, reports).send();
   }
 
@@ -158,8 +159,21 @@ public class Functions {
    * @param reports the reports to send
    * @see EmailSendingConfig#send()
    */
-  public static void send(Server server, Header header, Trailer trailer, Report... reports) {
+  public static void send(Server server, Header header, Trailer trailer, Report... reports)
+      throws Exception {
     email(server, header, trailer, reports).send();
+  }
+
+  public static LockType noLock() {
+    return LockType.NONE;
+  }
+
+  public static LockType sharedLock() {
+    return LockType.SHARED;
+  }
+
+  public static LockType exclusiveLock() {
+    return LockType.EXCLUSIVE;
   }
 
   private Functions() {}
@@ -205,12 +219,25 @@ public class Functions {
       return Functions.email(server, header, trailer, reports);
     }
 
-    public void send(Server server, Header header, Report... reports) {
+    public void send(Server server, Header header, Report... reports) throws Exception {
       Functions.send(server, header, reports);
     }
 
-    public void send(Server server, Header header, Trailer trailer, Report... reports) {
+    public void send(Server server, Header header, Trailer trailer, Report... reports)
+        throws Exception {
       Functions.send(server, header, trailer, reports);
+    }
+
+    public LockType noLock() {
+      return Functions.noLock();
+    }
+
+    public LockType sharedLock() {
+      return Functions.sharedLock();
+    }
+
+    public LockType exclusiveLock() {
+      return Functions.exclusiveLock();
     }
   }
 }

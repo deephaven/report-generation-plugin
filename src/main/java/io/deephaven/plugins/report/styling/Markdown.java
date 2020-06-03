@@ -13,28 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.deephaven.plugins.report;
+package io.deephaven.plugins.report.styling;
+
+import org.immutables.value.Value.Immutable;
+import org.immutables.value.Value.Parameter;
 
 /**
- * A reference to a table.
- *
- * @param <Self> the table type
+ * An {@link io.deephaven.plugins.report.Attribute} for annotating an {@link
+ * io.deephaven.plugins.report.Item} with markdown.
  */
-public interface Table<Self extends Table<Self>> extends Item<Self> {
+@Immutable
+public abstract class Markdown {
 
-  /** The visitor-pattern visitor. */
-  interface Visitor {
-    void visit(TableLocal table);
-
-    void visit(TablePQ table);
-  }
+  @Parameter
+  public abstract String value();
 
   /**
-   * The visitor-pattern dispatcher.
+   * Constructs a new markdown
    *
-   * @param visitor the visitor
-   * @param <V> the visitor type
-   * @return the same visitor
+   * @param value the value
+   * @return the size 2d
    */
-  <V extends Visitor> V walk(V visitor);
+  public static Markdown of(String value) {
+    return ImmutableMarkdown.of(value);
+  }
 }

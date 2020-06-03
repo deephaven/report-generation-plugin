@@ -23,8 +23,8 @@ of these objects.
 
 #### Type coercions
 * A `CharSequence` will be coerced into a [Text].
-* A `com.illumon.iris.db.tables.Table` will be coerced into a [Table].
-* A `com.illumon.iris.db.plot.Figure` will be coerced into a [Figure].
+* A `com.illumon.iris.db.tables.Table` will be coerced into a [TableLocal].
+* A `com.illumon.iris.db.plot.Figure` will be coerced into a [FigureLocal].
 * An `Iterable` or array will be coerced into a [Group], with each element coerced.
 
 #### Common helper methods
@@ -62,6 +62,13 @@ def historical = [[aapl_plot_historical, spy_plot_historical], "Some commentary 
 def recent = [[aapl_plot_recent, spy_plot_recent], "Some commentary on recent trends."]
 def conclusion = "Given the above, we should plan to do X, Y, and Z."
 def aapl_v_spy_report = report("AAPL v SPY", intro, historical, recent, conclusion)
+```
+
+```groovy
+...
+def pq1 = figure(pq("devin", "My Query"), "my_plot")
+def pq2 = figure(pq(31337L), "my_other_plot")
+def my_report = report("From PQs", pq1, pq2)
 ```
 
 ## Email
@@ -130,17 +137,37 @@ def email_header = email.header()
 email.send(localhost_server, email_header, pnl_report)
 ```
 
-## Slack
-TODO: Potential feature, the ability to send reports via Slack.
+### With explicit lock type
 
-Might look like:
+```groovy
+def email = io.deephaven.plugins.email.Functions.nonStatic()
+def report = io.deephaven.plugins.report.Functions.nonStatic()
+
+email.email(
+        email.localhost(),
+        email.header().sender("example@example.com").addRecipients("todo@example.com").subject("the subject").build(),
+        report.report("Simple report", "Simple text"))
+        .withLockType(email.noLock())
+```
+
+## Slack
+
+### Standard (shared lock by default)
 
 ```groovy
 def slack = io.deephaven.plugins.slack.Functions.nonStatic()
+def client = slack.client(slack.config("<token>", "#the_channel"))
+client.send("Simple string message")
+client.send(my_report)
+```
 
-def slack_config = slack.auth(...)
-
-slack.send(slack_config, my_report)
+### With explicit lock type
+```groovy
+def slack = io.deephaven.plugins.slack.Functions.nonStatic()
+def config = slack.config("<token>", "#the_channel")
+def client_with_no_lock = slack.client(config).withLockType(slack.noLock())
+def client_with_shared_lock = slack.client(config).withLockType(slack.sharedLock())
+def client_with_exclusive_lock = slack.client(config).withLockType(slack.exclusiveLock())
 ```
 
 # Development
@@ -162,7 +189,11 @@ slack.send(slack_config, my_report)
 [Item]: src/main/java/io/deephaven/plugins/report/Item.java
 [Text]: src/main/java/io/deephaven/plugins/report/Text.java
 [Table]: src/main/java/io/deephaven/plugins/report/Table.java
+[TableLocal]: src/main/java/io/deephaven/plugins/report/TableLocal.java
+[TablePQ]: src/main/java/io/deephaven/plugins/report/TablePQ.java
 [Figure]: src/main/java/io/deephaven/plugins/report/Figure.java
+[FigureLocal]: src/main/java/io/deephaven/plugins/report/FigureLocal.java
+[FigurePQ]: src/main/java/io/deephaven/plugins/report/FigurePQ.java
 [Group]: src/main/java/io/deephaven/plugins/report/Group.java
 [Functions]: src/main/java/io/deephaven/plugins/report/Functions.java
 [Email]: src/main/java/io/deephaven/plugins/email/Email.java

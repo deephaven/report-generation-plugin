@@ -20,7 +20,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.lang.StringEscapeUtils;
 
-class ItemToGroovyish implements Visitor {
+class ItemToGroovyish implements Visitor, Table.Visitor, Figure.Visitor {
 
   static String toString(Item<?> item) {
     return wrapName(item, item.walk(new ItemToGroovyish()).getOut());
@@ -37,7 +37,12 @@ class ItemToGroovyish implements Visitor {
   }
 
   @Override
-  public void visit(Figure figure) {
+  public void visit(Figure<?> figure) {
+    figure.walk((Figure.Visitor) this);
+  }
+
+  @Override
+  public void visit(FigureLocal figure) {
     if (figure.size().isPresent()) {
       out =
           String.format(
@@ -45,6 +50,23 @@ class ItemToGroovyish implements Visitor {
               figure.size().get().width(), figure.size().get().height());
     } else {
       out = "<plot>";
+    }
+  }
+
+  @Override
+  public void visit(FigurePQ figure) {
+    if (figure.size().isPresent()) {
+      out =
+          String.format(
+              "figure(%s, %s).withSize(%d, %d)",
+              PQToGroovyish.toString(figure.pq()),
+              toString(figure.figureName()),
+              figure.size().get().width(),
+              figure.size().get().height());
+    } else {
+      out =
+          String.format(
+              "figure(%s, %s)", PQToGroovyish.toString(figure.pq()), toString(figure.figureName()));
     }
   }
 
@@ -57,8 +79,20 @@ class ItemToGroovyish implements Visitor {
   }
 
   @Override
-  public void visit(Table table) {
+  public void visit(Table<?> table) {
+    table.walk((Table.Visitor) this);
+  }
+
+  @Override
+  public void visit(TableLocal table) {
     out = "<table>";
+  }
+
+  @Override
+  public void visit(TablePQ table) {
+    out =
+        String.format(
+            "table(%s, %s)", PQToGroovyish.toString(table.pq()), toString(table.tableName()));
   }
 
   @Override

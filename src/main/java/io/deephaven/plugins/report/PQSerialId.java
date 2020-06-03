@@ -15,26 +15,34 @@
  */
 package io.deephaven.plugins.report;
 
-/**
- * A reference to a table.
- *
- * @param <Self> the table type
- */
-public interface Table<Self extends Table<Self>> extends Item<Self> {
+import org.immutables.value.Value.Immutable;
+import org.immutables.value.Value.Parameter;
 
-  /** The visitor-pattern visitor. */
-  interface Visitor {
-    void visit(TableLocal table);
+/** A persistent-query by serial id. */
+@Immutable
+public abstract class PQSerialId implements PQ {
 
-    void visit(TablePQ table);
+  /**
+   * Construct a new instance.
+   *
+   * @param serialId the serial id
+   * @return the pq
+   */
+  public static PQSerialId of(long serialId) {
+    return ImmutablePQSerialId.of(serialId);
   }
 
   /**
-   * The visitor-pattern dispatcher.
+   * The serial id.
    *
-   * @param visitor the visitor
-   * @param <V> the visitor type
-   * @return the same visitor
+   * @return the id
    */
-  <V extends Visitor> V walk(V visitor);
+  @Parameter
+  public abstract long serialId();
+
+  @Override
+  public final <V extends Visitor> V walk(V visitor) {
+    visitor.visit(this);
+    return visitor;
+  }
 }

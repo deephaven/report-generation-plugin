@@ -16,31 +16,42 @@
 package io.deephaven.plugins.report;
 
 import org.immutables.value.Value.Immutable;
+import org.immutables.value.Value.Parameter;
 
-/** A group is an ordered collection of {@link #items() Items}. */
+/** A figure is an {@link Item} wrapping an underlying {@link com.illumon.iris.db.plot.Figure}. */
 @Immutable(builder = true, copy = false)
-public abstract class Group extends ItemBase<Group> {
+public abstract class FigureLocal extends FigureBase<FigureLocal> {
 
-  public static Builder builder() {
-    return new Builder();
+  /**
+   * Constructs a new figure item.
+   *
+   * @param figure the figure
+   * @return the figure item
+   */
+  public static FigureLocal of(com.illumon.iris.db.plot.Figure figure) {
+    return ImmutableFigureLocal.of(figure);
   }
 
-  public static class Builder extends ImmutableGroup.Builder {}
-
-  public abstract java.util.List<Item<?>> items();
+  /**
+   * The underlying figure.
+   *
+   * @return the figure
+   */
+  @Parameter
+  public abstract com.illumon.iris.db.plot.Figure figure();
 
   @Override
-  public final Group withAttribute(String key, Object value) {
-    return Group.builder().from(this).putAttributes(key, value).build();
+  public final FigureLocal withAttribute(String key, Object value) {
+    return ImmutableFigureLocal.builder().from(this).putAttributes(key, value).build();
   }
 
   @Override
-  final Group self() {
+  final FigureLocal self() {
     return this;
   }
 
   @Override
-  public final <V extends Visitor> V walk(V visitor) {
+  public final <V extends Figure.Visitor> V walk(V visitor) {
     visitor.visit(this);
     return visitor;
   }

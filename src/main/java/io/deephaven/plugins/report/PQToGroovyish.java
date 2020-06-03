@@ -15,26 +15,32 @@
  */
 package io.deephaven.plugins.report;
 
-/**
- * A reference to a table.
- *
- * @param <Self> the table type
- */
-public interface Table<Self extends Table<Self>> extends Item<Self> {
+import java.util.Objects;
 
-  /** The visitor-pattern visitor. */
-  interface Visitor {
-    void visit(TableLocal table);
+class PQToGroovyish implements PQ.Visitor {
 
-    void visit(TablePQ table);
+  static String toString(PQ pq) {
+    return pq.walk(new PQToGroovyish()).getOut();
   }
 
-  /**
-   * The visitor-pattern dispatcher.
-   *
-   * @param visitor the visitor
-   * @param <V> the visitor type
-   * @return the same visitor
-   */
-  <V extends Visitor> V walk(V visitor);
+  private String out;
+
+  private PQToGroovyish() {}
+
+  public String getOut() {
+    return Objects.requireNonNull(out);
+  }
+
+  @Override
+  public void visit(PQName pq) {
+    out =
+        String.format(
+            "pq(%s, %s)",
+            ItemToGroovyish.toString(pq.owner()), ItemToGroovyish.toString(pq.name()));
+  }
+
+  @Override
+  public void visit(PQSerialId pq) {
+    out = String.format("pq(%dL)", pq.serialId());
+  }
 }

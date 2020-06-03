@@ -15,26 +15,12 @@
  */
 package io.deephaven.plugins.report;
 
-/**
- * A reference to a table.
- *
- * @param <Self> the table type
- */
-public interface Table<Self extends Table<Self>> extends Item<Self> {
+public abstract class TableBase<Self extends TableBase<Self>> extends ItemBase<Self>
+    implements Table<Self> {
 
-  /** The visitor-pattern visitor. */
-  interface Visitor {
-    void visit(TableLocal table);
-
-    void visit(TablePQ table);
+  @Override
+  public final <V extends Item.Visitor> V walk(V visitor) {
+    visitor.visit(this);
+    return visitor;
   }
-
-  /**
-   * The visitor-pattern dispatcher.
-   *
-   * @param visitor the visitor
-   * @param <V> the visitor type
-   * @return the same visitor
-   */
-  <V extends Visitor> V walk(V visitor);
 }

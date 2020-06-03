@@ -13,47 +13,56 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.deephaven.plugins.report.styling;
+package io.deephaven.plugins.report;
 
 import org.immutables.value.Value.Check;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Parameter;
 
-/** An {@link io.deephaven.plugins.report.Attribute} target for 2-dimensional sizing information. */
+/** A reference to a persistent-query by owner and name. */
 @Immutable
-public abstract class Size2D {
+public abstract class PQName implements PQ {
 
   /**
-   * Constructs a new size 2d.
+   * Construct a new instance.
    *
-   * @param width the width
-   * @param height the height
-   * @return the size 2d
+   * @param owner the pq owner
+   * @param name the pq name
+   * @return the pq
    */
-  public static Size2D of(int width, int height) {
-    return ImmutableSize2D.of(width, height);
+  public static PQName of(String owner, String name) {
+    return ImmutablePQName.of(owner, name);
   }
 
   /**
-   * The height.
+   * The persistent-query owner.
    *
-   * @return the height
+   * @return the owner
    */
   @Parameter
-  public abstract int width();
+  public abstract String owner();
 
   /**
-   * The height.
+   * The persistent-query name.
    *
-   * @return the height
+   * @return the name
    */
   @Parameter
-  public abstract int height();
+  public abstract String name();
+
+  @Override
+  public final <V extends Visitor> V walk(V visitor) {
+    visitor.visit(this);
+    return visitor;
+  }
 
   @Check
   final void check() {
-    if (width() <= 0 || height() <= 0) {
-      throw new IllegalArgumentException("width and height must be positive");
+    if (owner().isEmpty()) {
+      throw new IllegalArgumentException("owner must be non-empty");
+    }
+    if (name().isEmpty()) {
+      throw new IllegalArgumentException("name must be non-empty");
     }
   }
 }

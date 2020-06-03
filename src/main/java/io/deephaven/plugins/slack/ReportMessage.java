@@ -13,35 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.deephaven.plugins.report;
+package io.deephaven.plugins.slack;
 
+import com.slack.api.Slack;
+import io.deephaven.plugins.report.Report;
+import java.util.List;
 import org.immutables.value.Value.Immutable;
 
-/** A group is an ordered collection of {@link #items() Items}. */
-@Immutable(builder = true, copy = false)
-public abstract class Group extends ItemBase<Group> {
+@Immutable
+public abstract class ReportMessage {
+
+  public static class Builder extends ImmutableReportMessage.Builder {}
 
   public static Builder builder() {
     return new Builder();
   }
 
-  public static class Builder extends ImmutableGroup.Builder {}
+  public abstract Config config();
 
-  public abstract java.util.List<Item<?>> items();
+  public abstract List<Report> reports();
 
-  @Override
-  public final Group withAttribute(String key, Object value) {
-    return Group.builder().from(this).putAttributes(key, value).build();
-  }
-
-  @Override
-  final Group self() {
-    return this;
-  }
-
-  @Override
-  public final <V extends Visitor> V walk(V visitor) {
-    visitor.visit(this);
-    return visitor;
+  public final void send() {
+    final Slack slack = Slack.getInstance();
+    final SlackMessagePerItemRenderer renderer =
+        ImmutableSlackMessagePerItemRenderer.builder()
+            .config(config())
+            .client(slack.methods(config().token()))
+            .build();
+    for (Report report : reports()) {
+      renderer.visit(report);
+    }
   }
 }

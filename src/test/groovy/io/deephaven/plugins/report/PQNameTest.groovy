@@ -15,26 +15,26 @@
  */
 package io.deephaven.plugins.report;
 
-/**
- * A reference to a table.
- *
- * @param <Self> the table type
- */
-public interface Table<Self extends Table<Self>> extends Item<Self> {
+import static org.assertj.core.api.Assertions.assertThat
 
-  /** The visitor-pattern visitor. */
-  interface Visitor {
-    void visit(TableLocal table);
+import org.junit.jupiter.api.Test
 
-    void visit(TablePQ table);
-  }
+class PQNameTest {
 
-  /**
-   * The visitor-pattern dispatcher.
-   *
-   * @param visitor the visitor
-   * @param <V> the visitor type
-   * @return the same visitor
-   */
-  <V extends Visitor> V walk(V visitor);
+	private static final PQSerialId PQ_ID = PQSerialId.of(31337L)
+
+	@Test
+	void pqStatic() {
+		assertThat(Functions.pq(31337L)).isEqualTo(PQ_ID)
+	}
+
+	@Test
+	void pqNonStatic() {
+		assertThat(Functions.nonStatic().pq(31337L)).isEqualTo(PQ_ID)
+	}
+
+	@Test
+	void groovyish() {
+		assertThat(PQToGroovyish.toString(PQ_ID)).isEqualTo("pq(31337L)")
+	}
 }

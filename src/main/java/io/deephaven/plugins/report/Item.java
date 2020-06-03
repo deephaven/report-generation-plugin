@@ -15,20 +15,18 @@
  */
 package io.deephaven.plugins.report;
 
-import java.util.Map;
-
 /**
  * An item is the basic building blocks of a {@link Report}.
  *
- * @param <I> the item's self-referential type
+ * @param <Self> the item's self-referential type
  */
-public interface Item<I extends Item<I>> {
+public interface Item<Self extends Item<Self>> extends Attributes<Self> {
 
   /** The visitor-pattern visitor. */
   interface Visitor {
-    void visit(Table table);
+    void visit(Table<?> table);
 
-    void visit(Figure figure);
+    void visit(Figure<?> figure);
 
     void visit(Text text);
 
@@ -36,45 +34,19 @@ public interface Item<I extends Item<I>> {
   }
 
   /**
-   * Get the attribute of the given key and type.
-   *
-   * @param key the key
-   * @param clazz the class of the value type
-   * @param <T> the value type
-   * @return the attribute
-   */
-  <T> Attribute<T, I> attribute(String key, Class<T> clazz);
-
-  /**
-   * Creates an item with the additional attribute.
-   *
-   * @param key the attribute key
-   * @param value the attribute value
-   * @return the new item
-   */
-  I withAttribute(String key, Object value);
-
-  /**
    * Equivalent to {@code name().with(name)}.
    *
    * @param name the name
    * @return the new item
    */
-  I withName(String name);
+  Self withName(String name);
 
   /**
    * Equivalent to {@code attribute("name", String.class)}.
    *
    * @return the name attribute
    */
-  Attribute<String, I> name();
-
-  /**
-   * The attribute map of the item.
-   *
-   * @return the attribute map
-   */
-  Map<String, Object> attributes();
+  Attribute<String, Self> name();
 
   /**
    * The visitor-pattern dispatcher.

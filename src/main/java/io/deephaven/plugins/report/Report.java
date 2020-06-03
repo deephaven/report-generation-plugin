@@ -15,6 +15,8 @@
  */
 package io.deephaven.plugins.report;
 
+import com.fishlib.io.logger.Logger;
+import java.time.Duration;
 import java.time.Instant;
 import org.immutables.value.Value.Check;
 import org.immutables.value.Value.Immutable;
@@ -24,7 +26,7 @@ import org.immutables.value.Value.Parameter;
  * A report contains a top-level {@link #item() item}, a {@link #title() title}, and a {@link
  * #timestamp() timestamp}.
  */
-@Immutable(builder = false)
+@Immutable
 public abstract class Report {
 
   /**
@@ -77,6 +79,10 @@ public abstract class Report {
   public final String toGroovyishDebug() {
     return String.format(
         "report(%s, %s)", ItemToGroovyish.toString(title()), ItemToGroovyish.toString(item()));
+  }
+
+  public final Report toLocal(Logger log, Duration duration) {
+    return of(title(), ToLocalVisitor.toLocal(item(), log, duration), timestamp());
   }
 
   @Check

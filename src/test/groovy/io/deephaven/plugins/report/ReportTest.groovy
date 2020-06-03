@@ -53,7 +53,7 @@ class ReportTest {
 		def pnl_plot = mockPlot()
 
 		def pnl_report = report("Devin's PNL Report for $date", pnl_table, figure(pnl_plot).withSize(800, 400))
-		assertThat(pnl_report.toGroovyishDebug()).isEqualTo("report(\"Devin's PNL Report for 2020-04-01\", [<table>, figure(<plot>).withSize(800, 400)])")
+		assertThat(pnl_report.toGroovyishDebug()).isEqualTo("""report("Devin's PNL Report for 2020-04-01", [<table>, figure(<plot>).withSize(800, 400)])""")
 	}
 
 	@Test
@@ -81,7 +81,7 @@ class ReportTest {
 		def section_3 = named("Quarterlies", section_3a, section_3b)
 
 		def expiration_report = report("By Expiration Report", section_1, section_2, section_3)
-		assertThat(expiration_report.toGroovyishDebug()).isEqualTo("report(\"By Expiration Report\", [named(\"Weeklies\", [<plot>, <table>]), named(\"Monthlies\", [<plot>, <table>]), named(\"Quarterlies\", [[<plot>, <table>], [<plot>, <table>]])])")
+		assertThat(expiration_report.toGroovyishDebug()).isEqualTo("""report("By Expiration Report", [named("Weeklies", [<plot>, <table>]), named("Monthlies", [<plot>, <table>]), named("Quarterlies", [[<plot>, <table>], [<plot>, <table>]])])""")
 	}
 
 	@Test
@@ -110,6 +110,14 @@ class ReportTest {
 		def conclusion = "Given the above, we should plan to do X, Y, and Z."
 
 		def aapl_v_spy_report = report("AAPL v SPY", intro, historical, recent, conclusion)
-		assertThat(aapl_v_spy_report.toGroovyishDebug()).isEqualTo("report(\"AAPL v SPY\", [\"This is some introductory text...\", [[<plot>, <plot>], \"Some commentary on historical trends.\"], [[<plot>, <plot>], \"Some commentary on recent trends.\"], \"Given the above, we should plan to do X, Y, and Z.\"])")
+		assertThat(aapl_v_spy_report.toGroovyishDebug()).isEqualTo("""report("AAPL v SPY", ["This is some introductory text...", [[<plot>, <plot>], "Some commentary on historical trends."], [[<plot>, <plot>], "Some commentary on recent trends."], "Given the above, we should plan to do X, Y, and Z."])""")
+	}
+
+	@Test
+	void example_4() {
+		def pq1 = figure(pq("devin", "My Query"), "my_plot")
+		def pq2 = figure(pq(31337L), "my_other_plot")
+		def my_report = report("From PQs", pq1, pq2)
+		assertThat(my_report.toGroovyishDebug()).isEqualTo("""report("From PQs", [figure(pq("devin", "My Query"), "my_plot"), figure(pq(31337L), "my_other_plot")])""");
 	}
 }

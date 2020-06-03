@@ -16,6 +16,7 @@
 package io.deephaven.plugins.email
 
 import io.deephaven.plugins.email.Functions as email
+import io.deephaven.plugins.report.Functions as report
 import org.junit.jupiter.api.Test
 
 class EmailTest {
@@ -48,5 +49,14 @@ class EmailTest {
 				.addRecipientsCC("admin@example.com")
 				.subject("You are the 1,000,000 visitor, open this email to win your prize!")
 				.build()
+	}
+
+	@Test
+	void lockTypeExampleFromReadme() {
+		email.email(
+				email.localhost(),
+				email.header().sender("example@example.com").addRecipients("todo@example.com").subject("the subject").build(),
+				report.report("Simple report", "Simple text"))
+				.withLockType(email.noLock())
 	}
 }

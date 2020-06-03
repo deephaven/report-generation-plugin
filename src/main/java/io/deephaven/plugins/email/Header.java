@@ -23,7 +23,7 @@ import org.immutables.value.Value.Immutable;
  *
  * @see Server
  */
-@Immutable
+@Immutable(builder = true, copy = false)
 public abstract class Header {
 
   /** The builder. */

@@ -15,12 +15,13 @@
  */
 package io.deephaven.plugins.report;
 
+import io.deephaven.plugins.report.styling.Markdown;
 import org.immutables.value.Value.Check;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Parameter;
 
 /** A text is an {@link Item} that represents a raw {@link String}. */
-@Immutable
+@Immutable(builder = true, copy = false)
 public abstract class Text extends ItemBase<Text> {
 
   /**
@@ -41,9 +42,29 @@ public abstract class Text extends ItemBase<Text> {
   @Parameter
   public abstract String value();
 
+  /** @return the {@code markdown} attribute */
+  public final Attribute<Markdown, Text> markdown() {
+    return attribute("markdown", Markdown.class);
+  }
+
+  /**
+   * Sets the {@code markdown} attribute.
+   *
+   * @param markdown the markdown
+   * @return the new text
+   */
+  public final Text withMarkdown(String markdown) {
+    return markdown().with(Markdown.of(markdown));
+  }
+
   @Override
   public final Text withAttribute(String key, Object value) {
     return ImmutableText.builder().from(this).putAttributes(key, value).build();
+  }
+
+  @Override
+  final Text self() {
+    return this;
   }
 
   @Override

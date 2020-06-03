@@ -70,23 +70,45 @@ public class Functions {
   }
 
   /**
-   * Equivalent to {@link Table#of(com.illumon.iris.db.tables.Table)}.
+   * Equivalent to {@link TableLocal#of(com.illumon.iris.db.tables.Table)}.
    *
    * @param table the table
    * @return the table item
    */
-  public static Table table(com.illumon.iris.db.tables.Table table) {
-    return Table.of(table);
+  public static TableLocal table(com.illumon.iris.db.tables.Table table) {
+    return TableLocal.of(table);
   }
 
   /**
-   * Equivalent to {@link Figure#of(com.illumon.iris.db.plot.Figure)}.
+   * Equivalent to {@link TablePQ#of(PQ, String)}.
+   *
+   * @param pq the pq
+   * @param tableName the table name
+   * @return the table pq
+   */
+  public static TablePQ table(PQ pq, String tableName) {
+    return TablePQ.of(pq, tableName);
+  }
+
+  /**
+   * Equivalent to {@link FigureLocal#of(com.illumon.iris.db.plot.Figure)}.
    *
    * @param figure the figure
    * @return the figure item
    */
-  public static Figure figure(com.illumon.iris.db.plot.Figure figure) {
-    return Figure.of(figure);
+  public static FigureLocal figure(com.illumon.iris.db.plot.Figure figure) {
+    return FigureLocal.of(figure);
+  }
+
+  /**
+   * Equivalent to {@link FigurePQ#of(PQ, String)}.
+   *
+   * @param pq the pq
+   * @param figureName the figure name
+   * @return the figure pq
+   */
+  public static FigurePQ figure(PQ pq, String figureName) {
+    return FigurePQ.of(pq, figureName);
   }
 
   /**
@@ -99,7 +121,32 @@ public class Functions {
     return Group.builder().addItems(items).build();
   }
 
+  /**
+   * Equivalent to {@link PQName#of(String, String)}.
+   *
+   * @param owner the pq owner
+   * @param name the pq name
+   * @return the pq
+   */
+  public static PQName pq(String owner, String name) {
+    return PQName.of(owner, name);
+  }
+
+  /**
+   * Equivalent to {@link PQSerialId#of(long)}.
+   *
+   * @param serialId the serial id
+   * @return the pq
+   */
+  public static PQSerialId pq(long serialId) {
+    return PQSerialId.of(serialId);
+  }
+
   // --------------------------------------------------------------------------------------------
+
+  public static <T extends Item<?>> T item(T item) {
+    return item;
+  }
 
   /**
    * Coerces the array of objects into an {@link Group}, where each item is further coerced.
@@ -133,8 +180,8 @@ public class Functions {
    * <ol>
    *   <li>an {@link Item}, the item is returned
    *   <li>a {@link CharSequence}, an appropriate {@link Text} is returned
-   *   <li>a {@link com.illumon.iris.db.tables.Table}, an appropriate {@link Table} is returned
-   *   <li>a {@link com.illumon.iris.db.plot.Figure}, an appropriate {@link Figure} is returned
+   *   <li>a {@link com.illumon.iris.db.tables.Table}, an appropriate {@link TableLocal} is returned
+   *   <li>a {@link com.illumon.iris.db.plot.Figure}, an appropriate {@link FigureLocal} is returned
    *   <li>an {@link Iterable} or array, a {@link Group} is returned where each item is further
    *       coerced
    * </ol>
@@ -251,16 +298,28 @@ public class Functions {
       return Functions.text(text);
     }
 
-    public Table table(com.illumon.iris.db.tables.Table table) {
+    public TableLocal table(com.illumon.iris.db.tables.Table table) {
       return Functions.table(table);
     }
 
-    public Figure figure(com.illumon.iris.db.plot.Figure figure) {
+    public TablePQ table(PQ pq, String tableName) throws Exception {
+      return Functions.table(pq, tableName);
+    }
+
+    public FigureLocal figure(com.illumon.iris.db.plot.Figure figure) {
       return Functions.figure(figure);
+    }
+
+    public FigurePQ figure(PQ pq, String figureName) {
+      return Functions.figure(pq, figureName);
     }
 
     public Group group(Item<?>... items) {
       return Functions.group(items);
+    }
+
+    public <T extends Item<?>> T item(T item) {
+      return Functions.item(item);
     }
 
     public Group item(Iterable<Object> items) {
@@ -293,6 +352,14 @@ public class Functions {
 
     public Item<?> attr(Object item, String key, Object value) {
       return Functions.attr(item, key, value);
+    }
+
+    public PQName pq(String owner, String name) {
+      return Functions.pq(owner, name);
+    }
+
+    public PQSerialId pq(long serialId) {
+      return Functions.pq(serialId);
     }
   }
 }

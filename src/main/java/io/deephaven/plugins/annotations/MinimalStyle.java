@@ -20,15 +20,22 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.immutables.value.Value;
+import org.immutables.value.Value.Immutable;
+import org.immutables.value.Value.Style;
 import org.immutables.value.Value.Style.ImplementationVisibility;
 
 /**
- * The default styling that our domain objects will inherit.
+ * A minimal styling that exposes the smallest surface area. Has the {@link Style#defaults()} set
+ * with {@link Immutable#builder()} and {@link Immutable#copy()} as {@code false}.
  *
  * @see <a
  *     href="https://immutables.github.io/style.html">https://immutables.github.io/style.html</a>
  */
 @Target({ElementType.PACKAGE, ElementType.TYPE})
 @Retention(RetentionPolicy.CLASS) // Make it class retention for incremental compilation
-@Value.Style(visibility = ImplementationVisibility.PACKAGE, overshadowImplementation = true)
-public @interface DefaultStyle {}
+@Value.Style(
+    visibility = ImplementationVisibility.PACKAGE,
+    overshadowImplementation = true,
+    jdkOnly = true,
+    defaults = @Value.Immutable(builder = false, copy = false))
+public @interface MinimalStyle {}
