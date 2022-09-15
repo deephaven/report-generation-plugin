@@ -56,7 +56,7 @@ public class Functions {
    *
    * @return the trailer
    */
-  public static Trailer noTrailer() {
+  public static Trailer noTrailer() { // todo safe to remove?
     return Trailer.none();
   }
 

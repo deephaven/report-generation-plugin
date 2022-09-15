@@ -38,7 +38,7 @@ public abstract class HTMLFile {
     NONE {
       @Override
       String render(InlineHtmlRenderer renderer) throws Exception {
-        return renderer.render();
+        return renderer.renderHtml();
       }
     },
 
@@ -49,7 +49,7 @@ public abstract class HTMLFile {
         return LiveTableMonitor.DEFAULT
             .sharedLock()
             .computeLocked(
-                (FunctionalInterfaces.ThrowingSupplier<String, Exception>) renderer::render);
+                (FunctionalInterfaces.ThrowingSupplier<String, Exception>) renderer::renderHtml);
       }
     },
 
@@ -60,14 +60,14 @@ public abstract class HTMLFile {
         return LiveTableMonitor.DEFAULT
             .exclusiveLock()
             .computeLocked(
-                (FunctionalInterfaces.ThrowingSupplier<String, Exception>) renderer::render);
+                (FunctionalInterfaces.ThrowingSupplier<String, Exception>) renderer::renderHtml);
       }
     };
 
     abstract String render(InlineHtmlRenderer renderer) throws Exception;
   }
 
-  public final void save(String filePath) throws Exception {
+  public final void save() throws Exception {
     final HTMLFile local =
         HTMLFile.builder()
             .from(this)
@@ -76,17 +76,17 @@ public abstract class HTMLFile {
                     .map(r -> r.toLocal(Logger.NULL, timeout()))
                     .collect(Collectors.toList()))
             .build();
-    final String htmlString = lockType().render(InlineHtmlRenderer.from(local));
-    writeToFile(htmlString, filePath);
+    final String htmlString = lockType().render(new InlineHtmlFileRenderer(local));
+    writeToFile(htmlString);
   }
 
-  private void writeToFile(String htmlString, String filePath) throws Exception {
-    String directory = new File(filePath).getParent();
+  private void writeToFile(String htmlString) throws Exception {
+    String directory = new File(filePath()).getParent();
     if (null != directory) {
       Files.createDirectories(Paths.get(directory));
     }
 
-    try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath()))) {
       for (String line : htmlString.split("\\n")) {
         bw.write(line + "\n");
       }
@@ -111,6 +111,13 @@ public abstract class HTMLFile {
    * @return the reports
    */
   public abstract List<Report> reports();
+
+  /**
+   * The filePath.
+   *
+   * @return the file path
+   */
+  public abstract String filePath();
 
   /**
    * The lock type. Defaults to {@link LockType#SHARED}.

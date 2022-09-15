@@ -16,18 +16,45 @@
 package io.deephaven.plugins.email;
 
 import io.deephaven.plugins.html.InlineHtmlRenderer;
+import io.deephaven.plugins.html.Trailer;
+import io.deephaven.plugins.report.Figure;
+import io.deephaven.plugins.report.Report;
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.List;
 import java.util.Objects;
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.ImageHtmlEmail;
 import org.apache.commons.mail.resolver.DataSourceFileResolver;
 
-class EmailHtmlRenderer {
+class EmailHtmlRenderer extends InlineHtmlRenderer {
 
   private final EmailSendingConfig config;
 
   EmailHtmlRenderer(EmailSendingConfig reports) {
     this.config = Objects.requireNonNull(reports);
+  }
+
+  @Override
+  protected Trailer trailer() {
+    return config.trailer();
+  }
+
+  @Override
+  protected List<Report> reports() {
+    return config.reports();
+  }
+
+  @Override
+  protected File createFigureFile(Figure<?> figure) {
+    try {
+      return File.createTempFile(
+          figure.name().orElse("figure") + "-", ".png", config.tmpDirectory());
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
   ImageHtmlEmail render() throws EmailException {
@@ -72,6 +99,6 @@ class EmailHtmlRenderer {
   }
 
   private String createHtml() {
-    return InlineHtmlRenderer.from(config).render();
+    return new EmailHtmlRenderer(config).renderHtml();
   }
 }

@@ -34,7 +34,7 @@ class HTMLTest {
 		Path tmpFile = Files.createTempFile(tmpDir, "saveTest1", ".html")
 
 		def test_report = report("The report", item("Simple text"), Instant.EPOCH)
-		HTMLFile.builder().lockType(HTMLFile.LockType.NONE).addReports(test_report).build().save(tmpFile.toString())
+		HTMLFile.builder().lockType(HTMLFile.LockType.NONE).addReports(test_report).filePath(tmpFile.toString()).build().save()
 		def lines = Files.readAllLines(tmpFile, StandardCharsets.UTF_8)
 		final String html = String.join("\n", lines)
 		assertThat(html).isEqualTo("<html>\n" +

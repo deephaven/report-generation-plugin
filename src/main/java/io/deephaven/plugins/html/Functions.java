@@ -34,25 +34,33 @@ public class Functions {
   }
 
   /**
+   * Equivalent to {@link Trailer#none()}.
+   *
+   * @return the trailer
+   */
+  public static Trailer noTrailer() {
+    return Trailer.none();
+  }
+
+  /**
+   * Equivalent to {@link Trailer#of(String)}.
+   *
+   * @param html the html
+   * @return the trailer
+   */
+  public static Trailer customTrailer(String html) {
+    return Trailer.of(html);
+  }
+
+  /**
    * Creates an {@link HTMLFile} for the {@code report}, then saves it to {@code filePath}.
    *
    * @param filePath the full path to the file that will be written
    * @param report the report to save
-   * @see HTMLFile#save(String)
+   * @see HTMLFile#save()
    */
   public static void save(String filePath, Report report) throws Exception {
-    HTMLFile.builder().addReports(report).build().save(filePath);
-  }
-
-  /**
-   * Creates an {@link HTMLFile} an email for the {@code reports}, with the default {@link Trailer}.
-   *
-   * @param filePath the full path to the file that will be written
-   * @param htmlFile the {@link HTMLFile} to save
-   * @see HTMLFile#save(String)
-   */
-  public static void save(String filePath, HTMLFile htmlFile) throws Exception {
-    htmlFile.save(filePath);
+    HTMLFile.builder().addReports(report).filePath(filePath).build().save();
   }
 
   public static EmailSendingConfig.LockType noLock() {
@@ -71,12 +79,16 @@ public class Functions {
   public enum NonStatic {
     INSTANCE;
 
-    public void save(String filePath, Report report) throws Exception {
-      Functions.save(filePath, report);
+    public Trailer noTrailer() {
+      return Functions.noTrailer();
     }
 
-    public void save(String filePath, HTMLFile htmlFile) throws Exception {
-      Functions.save(filePath, htmlFile);
+    public Trailer customTrailer(String html) {
+      return Functions.customTrailer(html);
+    }
+
+    public void save(String filePath, Report report) throws Exception {
+      Functions.save(filePath, report);
     }
 
     public EmailSendingConfig.LockType noLock() {
