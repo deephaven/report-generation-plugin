@@ -21,9 +21,9 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 
-class Resources {
-  static String toString(Class<?> clazz, String resource) throws IOException {
-    try (final InputStream in = clazz.getResourceAsStream("inline.css")) {
+public class Resources {
+  public static String toString(Class<?> clazz, String resource) throws IOException {
+    try (final InputStream in = clazz.getResourceAsStream(resource)) {
       if (in == null) {
         throw new NullPointerException(String.format("Unable to find resource '%s'.", resource));
       }
@@ -37,7 +37,7 @@ class Resources {
     }
   }
 
-  static String toStringUnchecked(Class<?> clazz, String resource) {
+  public static String toStringUnchecked(Class<?> clazz, String resource) {
     try {
       return toString(clazz, resource);
     } catch (IOException e) {

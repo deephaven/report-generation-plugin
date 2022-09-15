@@ -18,6 +18,7 @@ package io.deephaven.plugins.email;
 import com.fishlib.io.logger.Logger;
 import com.illumon.iris.db.tables.live.LiveTableMonitor;
 import com.illumon.util.FunctionalInterfaces.ThrowingSupplier;
+import io.deephaven.plugins.html.Trailer;
 import io.deephaven.plugins.report.Report;
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +41,7 @@ public abstract class EmailSendingConfig {
     /** Do not acquire a lock to render the email. */
     NONE {
       @Override
-      ImageHtmlEmail render(InlineHtmlRenderer renderer) throws Exception {
+      ImageHtmlEmail render(EmailHtmlRenderer renderer) throws Exception {
         return renderer.render();
       }
     },
@@ -48,7 +49,7 @@ public abstract class EmailSendingConfig {
     /** Acquire a {@link LiveTableMonitor#sharedLock()} to render the email. */
     SHARED {
       @Override
-      ImageHtmlEmail render(InlineHtmlRenderer renderer) throws Exception {
+      ImageHtmlEmail render(EmailHtmlRenderer renderer) throws Exception {
         return LiveTableMonitor.DEFAULT
             .sharedLock()
             .computeLocked((ThrowingSupplier<ImageHtmlEmail, Exception>) renderer::render);
@@ -58,14 +59,14 @@ public abstract class EmailSendingConfig {
     /** Acquire an {@link LiveTableMonitor#exclusiveLock()} ()} to render the email. */
     EXCLUSIVE {
       @Override
-      ImageHtmlEmail render(InlineHtmlRenderer renderer) throws Exception {
+      ImageHtmlEmail render(EmailHtmlRenderer renderer) throws Exception {
         return LiveTableMonitor.DEFAULT
             .exclusiveLock()
             .computeLocked((ThrowingSupplier<ImageHtmlEmail, Exception>) renderer::render);
       }
     };
 
-    abstract ImageHtmlEmail render(InlineHtmlRenderer renderer) throws Exception;
+    abstract ImageHtmlEmail render(EmailHtmlRenderer renderer) throws Exception;
   }
 
   /** The builder. */
@@ -175,7 +176,7 @@ public abstract class EmailSendingConfig {
                     .map(r -> r.toLocal(Logger.NULL, timeout()))
                     .collect(Collectors.toList()))
             .build();
-    lockType().render(new InlineHtmlRenderer(local)).send();
+    lockType().render(new EmailHtmlRenderer(local)).send();
   }
 
   @Check

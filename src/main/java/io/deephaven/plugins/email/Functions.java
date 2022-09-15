@@ -16,6 +16,7 @@
 package io.deephaven.plugins.email;
 
 import io.deephaven.plugins.email.EmailSendingConfig.LockType;
+import io.deephaven.plugins.html.Trailer;
 import io.deephaven.plugins.report.Report;
 
 /** A collection of static helper functions to aid in the creation and sending of emails. */

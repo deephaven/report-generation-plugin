@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.deephaven.plugins.email
+package io.deephaven.plugins.html
 
+import io.deephaven.plugins.email.EmailSendingConfig
+import io.deephaven.plugins.email.Header
+import io.deephaven.plugins.email.Server
 import io.deephaven.plugins.report.Item
 import io.deephaven.plugins.report.Report
 import org.apache.commons.mail.EmailException
@@ -236,7 +239,7 @@ class InlineHtmlRendererTest {
 
 	@Test
 	void noTrailer() throws EmailException {
-		final String html = getHtml(Functions.noTrailer(), report("The report", item("Simple text"), Instant.EPOCH));
+		final String html = getHtml(io.deephaven.plugins.email.Functions.noTrailer(), report("The report", item("Simple text"), Instant.EPOCH));
 		assertThat(html).isEqualTo("""<html>
  <head>
   <style>
@@ -291,7 +294,7 @@ class InlineHtmlRendererTest {
 
 	@Test
 	void customTrailer() throws EmailException {
-		final String html = getHtml(Functions.customTrailer("<h1>Custom Trailer</h1>"), report("The report", item("Simple text"), Instant.EPOCH))
+		final String html = getHtml(io.deephaven.plugins.email.Functions.customTrailer("<h1>Custom Trailer</h1>"), report("The report", item("Simple text"), Instant.EPOCH))
 		assertThat(html).isEqualTo("""<html>
  <head>
   <style>
@@ -412,9 +415,9 @@ class InlineHtmlRendererTest {
 	}
 
 	private EmailSendingConfig getConfig(Report report) {
-		final Server server = Functions.localhost()
+		final Server server = io.deephaven.plugins.email.Functions.localhost()
 		final Header header =
-				Functions.header()
+				io.deephaven.plugins.email.Functions.header()
 				.sender("sender@deephaven.io")
 				.subject("[REPORT] Very cool report")
 				.addRecipients("receiver@deephaven.io")
@@ -428,9 +431,9 @@ class InlineHtmlRendererTest {
 	}
 
 	private EmailSendingConfig getConfig(Trailer trailer, Report report) {
-		final Server server = Functions.localhost()
+		final Server server = io.deephaven.plugins.email.Functions.localhost()
 		final Header header =
-				Functions.header()
+				io.deephaven.plugins.email.Functions.header()
 				.sender("sender@deephaven.io")
 				.subject("[REPORT] Very cool report")
 				.addRecipients("receiver@deephaven.io")
@@ -445,7 +448,7 @@ class InlineHtmlRendererTest {
 	}
 
 	private String getHtml(EmailSendingConfig config) throws EmailException {
-		final InlineHtmlRenderer renderer = new InlineHtmlRenderer(config)
+		final InlineHtmlRenderer renderer = InlineHtmlRenderer.from(config)
 		renderer.render()
 		renderer.getHtml()
 	}

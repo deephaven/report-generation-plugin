@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.deephaven.plugins.email;
+package io.deephaven.plugins.html;
 
 import com.fishlib.io.logger.Logger;
+import io.deephaven.plugins.email.EmailSendingConfig;
+import io.deephaven.plugins.email.Resources;
 import io.deephaven.plugins.report.Figure;
 import io.deephaven.plugins.report.Group;
 import io.deephaven.plugins.report.Item;
@@ -29,23 +31,21 @@ import io.deephaven.plugins.report.Text;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.mail.DefaultAuthenticator;
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.ImageHtmlEmail;
-import org.apache.commons.mail.resolver.DataSourceFileResolver;
 
-class InlineHtmlRenderer implements Visitor, Table.Visitor {
+public class InlineHtmlRenderer implements Visitor, Table.Visitor {
 
   private static final String INLINE_CSS =
       Resources.toStringUnchecked(InlineHtmlRenderer.class, "inline.css");
 
-  private final EmailSendingConfig config;
+  private final List<Report> reports;
+  private final Trailer trailer;
   private final StringBuilder html;
   private final java.util.List<Item<?>> context;
   private int depth;
@@ -53,14 +53,29 @@ class InlineHtmlRenderer implements Visitor, Table.Visitor {
   private final Logger logger;
   private final Duration timeout;
 
-  InlineHtmlRenderer(EmailSendingConfig reports) {
-    this.config = Objects.requireNonNull(reports);
+  public InlineHtmlRenderer(final List<Report> reports, final Trailer trailer) {
+    this.reports = Objects.requireNonNull(reports);
+    this.trailer = Objects.requireNonNull(trailer);
     this.html = new StringBuilder();
     this.context = new ArrayList<>();
     this.depth = 0;
 
     this.logger = Logger.NULL;
     this.timeout = Duration.ofSeconds(5); // todo
+  }
+
+  public static InlineHtmlRenderer from(final HTMLFile htmlFile) {
+    Objects.requireNonNull(htmlFile);
+
+    return new InlineHtmlRenderer(htmlFile.reports(), htmlFile.trailer());
+  }
+
+  public static InlineHtmlRenderer from(final EmailSendingConfig emailSendingConfig) {
+    if (emailSendingConfig == null) {
+      throw new IllegalArgumentException("emailSendingConfig must not be null");
+    }
+
+    return new InlineHtmlRenderer(emailSendingConfig.reports(), emailSendingConfig.trailer());
   }
 
   void header() {
@@ -84,9 +99,9 @@ class InlineHtmlRenderer implements Visitor, Table.Visitor {
   }
 
   void tailer() {
-    if (config.trailer().html().isPresent()) {
+    if (trailer.html().isPresent()) {
       nextLine("<div data-deephaven-type=\"trailer\">");
-      sameLine(config.trailer().html().get());
+      sameLine(trailer.html().get());
       sameLine("</div>");
     }
     depth -= 1;
@@ -101,50 +116,14 @@ class InlineHtmlRenderer implements Visitor, Table.Visitor {
     endReport(report);
   }
 
-  ImageHtmlEmail render() throws EmailException {
+  public String render() {
     createHtml();
-
-    final Server server = config.server();
-    final Header header = config.header();
-
-    final ImageHtmlEmail out = new ImageHtmlEmail();
-    out.setHostName(server.hostName());
-    server.smtpPort().ifPresent(out::setSmtpPort);
-    out.setSSLOnConnect(server.sslOnConnect());
-    server
-        .auth()
-        .walk(
-            new Authentication.Visitor() {
-              @Override
-              public void visit(AuthenticationBasic auth) {
-                out.setAuthenticator(new DefaultAuthenticator(auth.username(), auth.password()));
-              }
-
-              @Override
-              public void visit(AuthenticationNone auth) {
-                // do nothing
-              }
-            });
-    out.setFrom(header.sender());
-    out.setSubject(header.subject());
-    for (String recipient : header.recipients()) {
-      out.addTo(recipient);
-    }
-    for (String cc : header.recipientsCC()) {
-      out.addCc(cc);
-    }
-    for (String bcc : header.recipientsBCC()) {
-      out.addBcc(bcc);
-    }
-    out.setDataSourceResolver(new DataSourceFileResolver());
-    out.setHtmlMsg(html.toString());
-    out.setTextMsg("Your email client does not support HTML messages");
-    return out;
+    return html.toString();
   }
 
   private void createHtml() {
     header();
-    for (Report report : config.reports()) {
+    for (Report report : reports) {
       addReport(report);
     }
     tailer();
@@ -164,8 +143,7 @@ class InlineHtmlRenderer implements Visitor, Table.Visitor {
 
     final File file;
     try {
-      file =
-          File.createTempFile(figure.name().orElse("figure") + "-", ".png", config.tmpDirectory());
+      file = File.createTempFile(figure.name().orElse("figure") + "-", ".png", tmpDirectory());
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
@@ -294,6 +272,21 @@ class InlineHtmlRenderer implements Visitor, Table.Visitor {
   private void endReport(Report report) {
     depth -= 1;
     sameLine("</div>");
+  }
+
+  /**
+   * The temporary directory where images and other data may be written to.
+   *
+   * <p>Defaults to the system's temporary directory.
+   *
+   * @return the temporary directory
+   */
+  public File tmpDirectory() {
+    try {
+      return Files.createTempDirectory("HTMLRenderer").toFile();
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
   private static class GetDeephavenDataType implements Visitor {
