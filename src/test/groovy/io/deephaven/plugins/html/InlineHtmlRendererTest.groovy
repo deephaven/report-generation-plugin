@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.deephaven.plugins.email
+package io.deephaven.plugins.html
 
 import io.deephaven.plugins.report.Item
 import io.deephaven.plugins.report.Report
 import org.apache.commons.mail.EmailException
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.io.TempDir
 
 import java.time.Instant
 
@@ -27,7 +26,6 @@ import static io.deephaven.plugins.report.Functions.*
 import static org.assertj.core.api.Assertions.assertThat
 
 class InlineHtmlRendererTest {
-	@TempDir public File tmpDir
 
 	@Test
 	void simpleText() {
@@ -88,7 +86,7 @@ class InlineHtmlRendererTest {
 	@Test
 	void simpleNamedText() throws EmailException {
 		final String html =
-				getHtml(report("The report", named("The name", "Simple text"), Instant.EPOCH));
+				getHtml(report("The report", named("The name", "Simple text"), Instant.EPOCH))
 		assertThat(html).isEqualTo("""<html>
  <head>
   <style>
@@ -146,14 +144,14 @@ class InlineHtmlRendererTest {
 	@Test
 	void titlesGetSmallerTheMoreNestedTheyAre() throws EmailException {
 
-		final Item<?> a = named("a", "SimpleText");
-		final Item<?> b = named("b", Collections.singleton(a));
-		final Item<?> c = named("c", Collections.singleton(b));
-		final Item<?> d = named("d", Collections.singleton(c));
-		final Item<?> e = named("e", Collections.singleton(d));
-		final Item<?> f = named("f", Collections.singleton(e));
+		final Item<?> a = named("a", "SimpleText")
+		final Item<?> b = named("b", Collections.singleton(a))
+		final Item<?> c = named("c", Collections.singleton(b))
+		final Item<?> d = named("d", Collections.singleton(c))
+		final Item<?> e = named("e", Collections.singleton(d))
+		final Item<?> f = named("f", Collections.singleton(e))
 
-		final String html = getHtml(report("The report", f, Instant.EPOCH));
+		final String html = getHtml(report("The report", f, Instant.EPOCH))
 
 		assertThat(html).isEqualTo("""<html>
  <head>
@@ -236,7 +234,7 @@ class InlineHtmlRendererTest {
 
 	@Test
 	void noTrailer() throws EmailException {
-		final String html = getHtml(Functions.noTrailer(), report("The report", item("Simple text"), Instant.EPOCH));
+		final String html = getHtml(Functions.noTrailer(), report("The report", item("Simple text"), Instant.EPOCH))
 		assertThat(html).isEqualTo("""<html>
  <head>
   <style>
@@ -401,52 +399,33 @@ class InlineHtmlRendererTest {
 </html>""")
 	}
 
-	private String getHtml(Report report) throws EmailException {
-		final EmailSendingConfig config = getConfig(report)
+	private static String getHtml(Report report) throws EmailException {
+		final HTMLFile config = getConfig(report)
 		getHtml(config)
 	}
 
-	private String getHtml(Trailer trailer, Report report) throws EmailException {
-		final EmailSendingConfig config = getConfig(trailer, report)
+	private static String getHtml(Trailer trailer, Report report) throws EmailException {
+		final HTMLFile config = getConfig(trailer, report)
 		getHtml(config)
 	}
 
-	private EmailSendingConfig getConfig(Report report) {
-		final Server server = Functions.localhost()
-		final Header header =
-				Functions.header()
-				.sender("sender@deephaven.io")
-				.subject("[REPORT] Very cool report")
-				.addRecipients("receiver@deephaven.io")
-				.build()
-		EmailSendingConfig.builder()
-				.server(server)
-				.header(header)
+	private static HTMLFile getConfig(Report report) {
+		return HTMLFile.builder()
 				.addReports(report)
-				.tmpDirectory(tmpDir)
+				.filePath("test.html")
 				.build()
 	}
 
-	private EmailSendingConfig getConfig(Trailer trailer, Report report) {
-		final Server server = Functions.localhost()
-		final Header header =
-				Functions.header()
-				.sender("sender@deephaven.io")
-				.subject("[REPORT] Very cool report")
-				.addRecipients("receiver@deephaven.io")
-				.build()
-		EmailSendingConfig.builder()
-				.server(server)
-				.header(header)
+	private static HTMLFile getConfig(Trailer trailer, Report report) {
+		return HTMLFile.builder()
 				.addReports(report)
-				.tmpDirectory(tmpDir)
+				.filePath("test.html")
 				.trailer(trailer)
 				.build()
 	}
 
-	private String getHtml(EmailSendingConfig config) throws EmailException {
-		final InlineHtmlRenderer renderer = new InlineHtmlRenderer(config)
-		renderer.render()
-		renderer.getHtml()
+	private static String getHtml(HTMLFile config) throws EmailException {
+		final InlineHtmlFileRenderer renderer = new InlineHtmlFileRenderer(config)
+		renderer.renderHtml()
 	}
 }

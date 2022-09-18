@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.deephaven.plugins.email;
+package io.deephaven.plugins.html;
 
 import java.util.Optional;
 import org.immutables.value.Value.Check;
@@ -21,7 +21,7 @@ import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Parameter;
 
 /** The trailer is the final HTML element in the {@code <body>} tag. */
-@Immutable(builder = true, copy = false)
+@Immutable(copy = false)
 public abstract class Trailer {
 
   /**

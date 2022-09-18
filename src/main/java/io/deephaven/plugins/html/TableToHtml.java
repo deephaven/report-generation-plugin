@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.deephaven.plugins.email;
+package io.deephaven.plugins.html;
 
 import com.illumon.iris.db.tables.Table;
 import com.illumon.iris.db.tables.utils.DBDateTime;
@@ -24,7 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import org.apache.commons.lang.StringEscapeUtils;
 
-class TableToHtml {
+public class TableToHtml {
   public static String html(Table source) {
     List<String> columnNames = source.getDefinition().getColumnNames();
 
