@@ -149,6 +149,21 @@ email.email(
         report.report("Simple report", "Simple text"))
         .withLockType(email.noLock())
 ```
+## HTML
+
+### Save to file
+
+```groovy
+import static io.deephaven.plugins.report.Functions.*
+
+def date = currentDateNy()
+def pnl_table = db.i("Devins", "PNL").where("Date=$date")
+def pnl_plot = plot("PNL", pnl_table, "Timestamp", "PNL").show()
+def pnl_report = report("Devin's PNL Report for $date", pnl_table.tail(1), figure(pnl_plot).withSize(800, 400))
+html = io.deephaven.plugins.html.Functions.nonStatic()
+
+html.save("/db/TempFiles/dbquery/db_query_server/report.html", pnl_report)
+```
 
 ## Slack
 
