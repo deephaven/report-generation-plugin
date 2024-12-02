@@ -11,7 +11,7 @@ buildscript {
 			url new URI('https://illumon.jfrog.io/illumon/plugin-tools')
 		}
 		dependencies {
-			classpath 'io.deephaven.gradle:plugins:1.20200123.006'
+			classpath 'io.deephaven.gradle:plugins:1.20201022.033'
 		}
 	}
 }
@@ -20,8 +20,11 @@ plugins {
 	id 'java-library'
 	id 'groovy'
 	id 'idea'
+	id 'maven-publish'
 	id 'com.diffplug.gradle.spotless' version '4.1.0'
 }
+
+evaluationDependsOn(':reporting-tools')
 
 apply plugin: 'io.deephaven.plugins'
 
@@ -43,22 +46,26 @@ group = project.property('pluginGroup')
 version = project.property('pluginVersion')
 
 repositories {
-	jcenter()
+	mavenCentral()
 }
 
 configurations {
 	global
-	local
-	client
-	auth
 }
 
-dependencies {
-	api Deps.iris('DB')
-	api Deps.iris('Plot')
-	api 'org.apache.commons:commons-email:1.4'
+// this is only "safe" because we used evaluationDependsOn() at the top of this file.
+TaskProvider<?> shadowJar = project(":reporting-tools").tasks.named('shadowJar')
 
-	global 'com.slack.api:slack-api-client:1.0.7'
+dependencies {
+	api(Deps.iris('DB')) {
+		exclude group: 'org.apache.commons'
+	}
+	api(Deps.iris('Plot')) {
+		exclude group: 'org.apache.commons'
+	}
+
+	// add our dependencies on commons-email and slack api via a shadow jar, to avoid package conflicts
+	global provider({shadowJar.get().outputs.files})
 
 	annotationProcessor 'org.immutables:value:2.8.8'
 	compileOnly 'org.immutables:value-annotations:2.8.8'
@@ -76,6 +83,7 @@ tasks.withType(JavaCompile) {
 	// https://github.com/immutables/immutables/issues/672
 	options.compilerArgs.add('-Xlint:-processing')
 	options.compilerArgs.add('-Werror')
+	dependsOn shadowJar
 }
 
 test {
@@ -114,3 +122,36 @@ spotless {
 }
 
 check.dependsOn(':spotlessCheck')
+
+group 'io.deephaven.reporting.plugin'
+// using bard versioning b/c building for a bard customer. Need to cut jackson and then sanluis updates w/ newer plugin tools / gradle version
+version '1.20211129.001'
+sourceCompatibility = 1.8
+
+gradle.projectsEvaluated {
+	publishing {
+		publications {
+			pluginDeploy(MavenPublication) {
+				groupId = 'io.deephaven.plugins'
+				artifactId = 'report-generation-plugin'
+				from(components.java)
+				artifact(tasks['makeReport-generationRpm']) {
+					extension = 'rpm'
+				}
+				artifact(tasks['makeReport-generationTar']) {
+					extension = 'tgz'
+				}
+			}
+		}
+		repositories {
+			maven {
+				credentials {
+					username = findProperty('artifactoryUser') ?: System.getProperty('user.name')
+					password = findProperty('artifactoryAPIKey') ?: ''
+				}
+				url "https://illumon.jfrog.io/illumon/libs-plugin-customer"
+				name "customer"
+			}
+		}
+	}
+}

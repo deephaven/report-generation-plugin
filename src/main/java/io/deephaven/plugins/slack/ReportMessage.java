@@ -15,7 +15,7 @@
  */
 package io.deephaven.plugins.slack;
 
-import com.slack.api.Slack;
+import io.deephaven.reporting.com.slack.api.Slack;
 import io.deephaven.plugins.report.Report;
 import java.util.List;
 import org.immutables.value.Value.Immutable;

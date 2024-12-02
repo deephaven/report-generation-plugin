@@ -2,3 +2,5 @@ rootProject.name = 'report-generation'
 
 // https://docs.gradle.org/6.5/userguide/single_versions.html
 enableFeaturePreview("VERSION_ORDERING_V2")
+
+include(':reporting-tools')

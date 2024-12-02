@@ -27,13 +27,14 @@ import io.deephaven.plugins.report.Table;
 import io.deephaven.plugins.report.TableLocal;
 import io.deephaven.plugins.report.TablePQ;
 import io.deephaven.plugins.report.Text;
+import io.deephaven.reporting.org.apache.commons.text.StringEscapeUtils;
+
 import java.io.File;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import org.apache.commons.lang.StringEscapeUtils;
 
 public abstract class InlineHtmlRenderer implements Visitor, Table.Visitor {
 
@@ -191,7 +192,7 @@ public abstract class InlineHtmlRenderer implements Visitor, Table.Visitor {
   }
 
   private static String escape(String raw) {
-    return StringEscapeUtils.escapeHtml(raw);
+    return StringEscapeUtils.escapeHtml4(raw);
   }
 
   private void indent() {

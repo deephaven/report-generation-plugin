@@ -1,0 +1,37 @@
+/*
+ * Copyright (c) 2016-2024 Deephaven Data Labs and Patent Pending
+ */
+
+plugins {
+    id 'java-library'
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
+}
+configurations {
+    output
+}
+repositories {
+    mavenCentral()
+}
+dependencies {
+    // use the newest version which does not have any security issues
+    runtimeOnly 'org.apache.commons:commons-text:1.10.0'
+    runtimeOnly 'org.apache.commons:commons-email:1.6.0'
+    runtimeOnly 'com.slack.api:slack-api-client:1.40.3'
+}
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+tasks.named('shadowJar', ShadowJar).configure {
+    ShadowJar s ->
+        s.relocate('org', 'io.deephaven.reporting.org')
+        s.relocate('com', 'io.deephaven.reporting.com')
+        s.relocate('okio', 'io.deephaven.reporting.okio')
+        s.relocate('okhttp3', 'io.deephaven.reporting.okhttp3')
+        s.relocate('kotlin', 'io.deephaven.reporting.kotlin')
+        s.relocate('javax', 'io.deephaven.reporting.javax')
+        s.mergeServiceFiles()
+}
+
+artifacts {
+    output(tasks.shadowJar) {
+        builtBy tasks.shadowJar
+    }
+}
