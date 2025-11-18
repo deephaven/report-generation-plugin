@@ -28,7 +28,6 @@ import io.deephaven.plugins.report.TableLocal;
 import io.deephaven.plugins.report.TablePQ;
 import io.deephaven.plugins.report.Text;
 import io.deephaven.reporting.org.apache.commons.text.StringEscapeUtils;
-
 import java.io.File;
 import java.time.Duration;
 import java.util.ArrayList;

@@ -15,8 +15,18 @@
  */
 package io.deephaven.plugins.slack;
 
+import io.deephaven.plugins.report.Figure;
+import io.deephaven.plugins.report.Group;
+import io.deephaven.plugins.report.Item;
+import io.deephaven.plugins.report.Report;
+import io.deephaven.plugins.report.SaveFigure;
+import io.deephaven.plugins.report.Table;
+import io.deephaven.plugins.report.TableLocal;
+import io.deephaven.plugins.report.TablePQ;
+import io.deephaven.plugins.report.Text;
 import io.deephaven.reporting.com.slack.api.methods.MethodsClient;
 import io.deephaven.reporting.com.slack.api.methods.SlackApiException;
+import io.deephaven.reporting.com.slack.api.methods.SlackFilesUploadV2Exception;
 import io.deephaven.reporting.com.slack.api.methods.request.chat.ChatPostMessageRequest;
 import io.deephaven.reporting.com.slack.api.methods.request.chat.ChatPostMessageRequest.ChatPostMessageRequestBuilder;
 import io.deephaven.reporting.com.slack.api.methods.request.files.FilesUploadV2Request;
@@ -27,23 +37,13 @@ import io.deephaven.reporting.com.slack.api.model.block.LayoutBlock;
 import io.deephaven.reporting.com.slack.api.model.block.SectionBlock;
 import io.deephaven.reporting.com.slack.api.model.block.composition.MarkdownTextObject;
 import io.deephaven.reporting.com.slack.api.model.block.composition.PlainTextObject;
-import io.deephaven.plugins.report.Figure;
-import io.deephaven.plugins.report.Group;
-import io.deephaven.plugins.report.Item;
-import io.deephaven.plugins.report.Report;
-import io.deephaven.plugins.report.SaveFigure;
-import io.deephaven.plugins.report.Table;
-import io.deephaven.plugins.report.TableLocal;
-import io.deephaven.plugins.report.TablePQ;
-import io.deephaven.plugins.report.Text;
-import org.immutables.value.Value.Immutable;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.immutables.value.Value.Immutable;
 
 @Immutable(builder = true, copy = false)
 abstract class SlackMessagePerItemRenderer implements Item.Visitor, Table.Visitor {
@@ -171,10 +171,9 @@ abstract class SlackMessagePerItemRenderer implements Item.Visitor, Table.Visito
     }
 
     figure.walk(SaveFigure.builder().file(file).build());
-
     final FilesUploadV2Request request =
         FilesUploadV2Request.builder()
-            .title(figure.name().orElse(null))
+            .title(figure.name().orElse(""))
             .channel(config().channel())
             .filename(file.getName())
             .file(file)
@@ -183,6 +182,8 @@ abstract class SlackMessagePerItemRenderer implements Item.Visitor, Table.Visito
     final FilesUploadV2Response response;
     try {
       response = client().filesUploadV2(request);
+    } catch (SlackFilesUploadV2Exception e) {
+      throw new RuntimeException("Slack error: " + e);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     } catch (SlackApiException e) {

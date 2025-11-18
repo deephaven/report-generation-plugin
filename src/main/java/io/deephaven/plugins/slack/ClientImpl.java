@@ -17,6 +17,7 @@ package io.deephaven.plugins.slack;
 
 import com.fishlib.io.logger.Logger;
 import com.illumon.iris.db.tables.live.LiveTableMonitor;
+import io.deephaven.plugins.report.Report;
 import io.deephaven.reporting.com.slack.api.Slack;
 import io.deephaven.reporting.com.slack.api.methods.MethodsClient;
 import io.deephaven.reporting.com.slack.api.methods.SlackApiException;
@@ -24,7 +25,6 @@ import io.deephaven.reporting.com.slack.api.methods.request.chat.ChatPostMessage
 import io.deephaven.reporting.com.slack.api.methods.response.chat.ChatPostMessageResponse;
 import io.deephaven.reporting.com.slack.api.model.block.SectionBlock;
 import io.deephaven.reporting.com.slack.api.model.block.composition.MarkdownTextObject;
-import io.deephaven.plugins.report.Report;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.time.Duration;

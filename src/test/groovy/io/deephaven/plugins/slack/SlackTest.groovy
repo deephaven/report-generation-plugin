@@ -15,25 +15,25 @@
  */
 package io.deephaven.plugins.slack
 
-import io.deephaven.plugins.slack.Functions as slack
+// import io.deephaven.plugins.slack.Functions
 import org.junit.jupiter.api.Test
 
 class SlackTest {
 	@Test
 	void simpleClient() {
-		slack.client(slack.config("faketoken", "#fakechannel"))
+		Functions.client(Functions.config("faketoken", "#fakechannel"))
 	}
 
 	@Test
 	void noLockClient() {
-		slack.client(slack.config("faketoken", "#fakechannel")).withLockType(slack.noLock())
+		Functions.client(Functions.config("faketoken", "#fakechannel")).withLockType(Functions.noLock())
 	}
 
 	@Test
 	void lockTypeExampleFromReadme() {
-		def config = slack.config("<token>", "#the_channel")
-		def client_with_no_lock = slack.client(config).withLockType(slack.noLock())
-		def client_with_shared_lock = slack.client(config).withLockType(slack.sharedLock())
-		def client_with_exclusive_lock = slack.client(config).withLockType(slack.exclusiveLock())
+		def config = Functions.config("<token>", "#the_channel")
+		def client_with_no_lock = Functions.client(config).withLockType(Functions.noLock())
+		def client_with_shared_lock = Functions.client(config).withLockType(Functions.sharedLock())
+		def client_with_exclusive_lock = Functions.client(config).withLockType(Functions.exclusiveLock())
 	}
 }
