@@ -23,7 +23,6 @@ import io.deephaven.reporting.org.apache.commons.mail.DefaultAuthenticator;
 import io.deephaven.reporting.org.apache.commons.mail.EmailException;
 import io.deephaven.reporting.org.apache.commons.mail.ImageHtmlEmail;
 import io.deephaven.reporting.org.apache.commons.mail.resolver.DataSourceFileResolver;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;

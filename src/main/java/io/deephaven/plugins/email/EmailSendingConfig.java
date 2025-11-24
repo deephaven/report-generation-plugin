@@ -21,10 +21,6 @@ import com.illumon.util.FunctionalInterfaces.ThrowingSupplier;
 import io.deephaven.plugins.html.Trailer;
 import io.deephaven.plugins.report.Report;
 import io.deephaven.reporting.org.apache.commons.mail.ImageHtmlEmail;
-import org.immutables.value.Value.Check;
-import org.immutables.value.Value.Default;
-import org.immutables.value.Value.Immutable;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -32,6 +28,9 @@ import java.nio.file.Files;
 import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.immutables.value.Value.Check;
+import org.immutables.value.Value.Default;
+import org.immutables.value.Value.Immutable;
 
 /** The full configuration object related to sending report-based emails. */
 @Immutable(builder = true, copy = true)

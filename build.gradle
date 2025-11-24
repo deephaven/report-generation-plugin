@@ -88,6 +88,9 @@ tasks.withType(JavaCompile) {
 
 test {
 	useJUnitPlatform()
+	testLogging {
+		exceptionFormat = 'full'
+	}
 }
 
 wrapper {
@@ -125,7 +128,7 @@ check.dependsOn(':spotlessCheck')
 
 group 'io.deephaven.reporting.plugin'
 // using bard versioning b/c building for a bard customer. Need to cut jackson and then sanluis updates w/ newer plugin tools / gradle version
-version '1.20211129.001'
+version '1.20211129.002'
 sourceCompatibility = 1.8
 
 gradle.projectsEvaluated {

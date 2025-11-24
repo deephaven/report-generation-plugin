@@ -21,7 +21,6 @@ import com.illumon.iris.db.tables.utils.DBTimeZone;
 import com.illumon.iris.db.v2.sources.ColumnSource;
 import com.illumon.iris.db.v2.utils.Index;
 import io.deephaven.reporting.org.apache.commons.text.StringEscapeUtils;
-
 import java.util.Collection;
 import java.util.List;
 

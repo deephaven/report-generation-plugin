@@ -17,7 +17,7 @@ package io.deephaven.plugins.html
 
 import io.deephaven.plugins.report.Item
 import io.deephaven.plugins.report.Report
-import org.apache.commons.mail.EmailException
+import io.deephaven.reporting.org.apache.commons.mail.EmailException
 import org.junit.jupiter.api.Test
 
 import java.time.Instant

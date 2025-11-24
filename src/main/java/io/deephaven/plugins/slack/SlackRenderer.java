@@ -15,6 +15,13 @@
  */
 package io.deephaven.plugins.slack;
 
+import io.deephaven.plugins.report.Figure;
+import io.deephaven.plugins.report.Group;
+import io.deephaven.plugins.report.Item;
+import io.deephaven.plugins.report.Report;
+import io.deephaven.plugins.report.SaveFigure;
+import io.deephaven.plugins.report.Table;
+import io.deephaven.plugins.report.Text;
 import io.deephaven.reporting.com.slack.api.Slack;
 import io.deephaven.reporting.com.slack.api.methods.SlackApiException;
 import io.deephaven.reporting.com.slack.api.methods.request.chat.ChatPostMessageRequest;
@@ -29,14 +36,6 @@ import io.deephaven.reporting.com.slack.api.model.block.ImageBlock.ImageBlockBui
 import io.deephaven.reporting.com.slack.api.model.block.LayoutBlock;
 import io.deephaven.reporting.com.slack.api.model.block.SectionBlock;
 import io.deephaven.reporting.com.slack.api.model.block.composition.PlainTextObject;
-import io.deephaven.plugins.report.Figure;
-import io.deephaven.plugins.report.Group;
-import io.deephaven.plugins.report.Item;
-import io.deephaven.plugins.report.Report;
-import io.deephaven.plugins.report.SaveFigure;
-import io.deephaven.plugins.report.Table;
-import io.deephaven.plugins.report.Text;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;

@@ -21,10 +21,9 @@ import com.illumon.iris.controller.utils.PersistentQueryTableHelper.HelperPersis
 import com.illumon.iris.db.plot.FigureWidget;
 import com.illumon.iris.db.tables.remote.RemoteDatabase;
 import com.illumon.iris.db.tables.remote.ReportFigureCARQ;
+import java.time.Duration;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Parameter;
-
-import java.time.Duration;
 
 @Immutable(builder = true, copy = false)
 public abstract class FigurePQ extends FigureBase<FigurePQ> {

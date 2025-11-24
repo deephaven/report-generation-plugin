@@ -17,7 +17,6 @@ package io.deephaven.plugins.report;
 
 import io.deephaven.plugins.report.Item.Visitor;
 import io.deephaven.reporting.org.apache.commons.text.StringEscapeUtils;
-
 import java.util.Objects;
 import java.util.stream.Collectors;
 
