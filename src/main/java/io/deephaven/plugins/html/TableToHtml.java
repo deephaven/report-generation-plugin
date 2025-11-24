@@ -20,9 +20,9 @@ import com.illumon.iris.db.tables.utils.DBDateTime;
 import com.illumon.iris.db.tables.utils.DBTimeZone;
 import com.illumon.iris.db.v2.sources.ColumnSource;
 import com.illumon.iris.db.v2.utils.Index;
+import io.deephaven.reporting.org.apache.commons.text.StringEscapeUtils;
 import java.util.Collection;
 import java.util.List;
-import org.apache.commons.lang.StringEscapeUtils;
 
 public class TableToHtml {
   public static String html(Table source) {
@@ -50,12 +50,12 @@ public class TableToHtml {
         out.append("<td>");
         final Object value = columnSource.get(key);
         if (value instanceof String) {
-          out.append(StringEscapeUtils.escapeHtml((String) value));
+          out.append(StringEscapeUtils.escapeHtml4((String) value));
         } else if (value instanceof DBDateTime) {
           final DBDateTime dbDateTime = (DBDateTime) value;
-          out.append(StringEscapeUtils.escapeHtml(dbDateTime.toString(DBTimeZone.TZ_DEFAULT)));
+          out.append(StringEscapeUtils.escapeHtml4(dbDateTime.toString(DBTimeZone.TZ_DEFAULT)));
         } else if (value != null) {
-          out.append(StringEscapeUtils.escapeHtml(value.toString()));
+          out.append(StringEscapeUtils.escapeHtml4(value.toString()));
         } else {
           // For now, don't output anything for null values.
         }

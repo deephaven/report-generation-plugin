@@ -15,20 +15,6 @@
  */
 package io.deephaven.plugins.slack;
 
-import com.slack.api.Slack;
-import com.slack.api.methods.SlackApiException;
-import com.slack.api.methods.request.chat.ChatPostMessageRequest;
-import com.slack.api.methods.request.files.FilesSharedPublicURLRequest;
-import com.slack.api.methods.request.files.FilesUploadRequest;
-import com.slack.api.methods.response.files.FilesSharedPublicURLResponse;
-import com.slack.api.methods.response.files.FilesUploadResponse;
-import com.slack.api.model.block.ContextBlock;
-import com.slack.api.model.block.DividerBlock;
-import com.slack.api.model.block.ImageBlock;
-import com.slack.api.model.block.ImageBlock.ImageBlockBuilder;
-import com.slack.api.model.block.LayoutBlock;
-import com.slack.api.model.block.SectionBlock;
-import com.slack.api.model.block.composition.PlainTextObject;
 import io.deephaven.plugins.report.Figure;
 import io.deephaven.plugins.report.Group;
 import io.deephaven.plugins.report.Item;
@@ -36,6 +22,20 @@ import io.deephaven.plugins.report.Report;
 import io.deephaven.plugins.report.SaveFigure;
 import io.deephaven.plugins.report.Table;
 import io.deephaven.plugins.report.Text;
+import io.deephaven.reporting.com.slack.api.Slack;
+import io.deephaven.reporting.com.slack.api.methods.SlackApiException;
+import io.deephaven.reporting.com.slack.api.methods.request.chat.ChatPostMessageRequest;
+import io.deephaven.reporting.com.slack.api.methods.request.files.FilesSharedPublicURLRequest;
+import io.deephaven.reporting.com.slack.api.methods.request.files.FilesUploadV2Request;
+import io.deephaven.reporting.com.slack.api.methods.response.files.FilesSharedPublicURLResponse;
+import io.deephaven.reporting.com.slack.api.methods.response.files.FilesUploadV2Response;
+import io.deephaven.reporting.com.slack.api.model.block.ContextBlock;
+import io.deephaven.reporting.com.slack.api.model.block.DividerBlock;
+import io.deephaven.reporting.com.slack.api.model.block.ImageBlock;
+import io.deephaven.reporting.com.slack.api.model.block.ImageBlock.ImageBlockBuilder;
+import io.deephaven.reporting.com.slack.api.model.block.LayoutBlock;
+import io.deephaven.reporting.com.slack.api.model.block.SectionBlock;
+import io.deephaven.reporting.com.slack.api.model.block.composition.PlainTextObject;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -94,7 +94,7 @@ class SlackRenderer implements Item.Visitor {
 
   @Override
   public void visit(Figure<?> figure) {
-    final com.slack.api.model.File file = uploadFigure(figure);
+    final io.deephaven.reporting.com.slack.api.model.File file = uploadFigure(figure);
     final ImageBlockBuilder builder = ImageBlock.builder().imageUrl(getUrl(file));
     if (figure.name().isPresent()) {
       builder.title(PlainTextObject.builder().text(figure.name().get()).build());
@@ -125,7 +125,7 @@ class SlackRenderer implements Item.Visitor {
     }
   }
 
-  private static String getUrl(com.slack.api.model.File file) {
+  private static String getUrl(io.deephaven.reporting.com.slack.api.model.File file) {
     // very hacky :s
     final String[] parts = file.getPermalinkPublic().split("-");
     final String pubSecret = parts[parts.length - 1];
@@ -146,7 +146,7 @@ class SlackRenderer implements Item.Visitor {
             .build());
   }
 
-  private com.slack.api.model.File uploadFigure(Figure<?> figure) {
+  private io.deephaven.reporting.com.slack.api.model.File uploadFigure(Figure<?> figure) {
     final File file;
     try {
       file = File.createTempFile(figure.name().orElse("figure") + "-", ".png");
@@ -156,16 +156,16 @@ class SlackRenderer implements Item.Visitor {
 
     figure.walk(SaveFigure.builder().file(file).build());
 
-    final FilesUploadRequest request =
-        FilesUploadRequest.builder()
+    final FilesUploadV2Request request =
+        FilesUploadV2Request.builder()
             // .channels(Collections.singletonList(config.channel()))
             .filename(file.getName())
             .file(file)
             .build();
 
-    final FilesUploadResponse response;
+    final FilesUploadV2Response response;
     try {
-      response = slack.methods(config.token()).filesUpload(request);
+      response = slack.methods(config.token()).filesUploadV2(request);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     } catch (SlackApiException e) {

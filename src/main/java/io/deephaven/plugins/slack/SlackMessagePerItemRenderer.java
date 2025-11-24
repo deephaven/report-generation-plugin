@@ -15,18 +15,6 @@
  */
 package io.deephaven.plugins.slack;
 
-import com.slack.api.methods.MethodsClient;
-import com.slack.api.methods.SlackApiException;
-import com.slack.api.methods.request.chat.ChatPostMessageRequest;
-import com.slack.api.methods.request.chat.ChatPostMessageRequest.ChatPostMessageRequestBuilder;
-import com.slack.api.methods.request.files.FilesUploadRequest;
-import com.slack.api.methods.response.chat.ChatPostMessageResponse;
-import com.slack.api.methods.response.files.FilesUploadResponse;
-import com.slack.api.model.block.ContextBlock;
-import com.slack.api.model.block.LayoutBlock;
-import com.slack.api.model.block.SectionBlock;
-import com.slack.api.model.block.composition.MarkdownTextObject;
-import com.slack.api.model.block.composition.PlainTextObject;
 import io.deephaven.plugins.report.Figure;
 import io.deephaven.plugins.report.Group;
 import io.deephaven.plugins.report.Item;
@@ -36,6 +24,19 @@ import io.deephaven.plugins.report.Table;
 import io.deephaven.plugins.report.TableLocal;
 import io.deephaven.plugins.report.TablePQ;
 import io.deephaven.plugins.report.Text;
+import io.deephaven.reporting.com.slack.api.methods.MethodsClient;
+import io.deephaven.reporting.com.slack.api.methods.SlackApiException;
+import io.deephaven.reporting.com.slack.api.methods.SlackFilesUploadV2Exception;
+import io.deephaven.reporting.com.slack.api.methods.request.chat.ChatPostMessageRequest;
+import io.deephaven.reporting.com.slack.api.methods.request.chat.ChatPostMessageRequest.ChatPostMessageRequestBuilder;
+import io.deephaven.reporting.com.slack.api.methods.request.files.FilesUploadV2Request;
+import io.deephaven.reporting.com.slack.api.methods.response.chat.ChatPostMessageResponse;
+import io.deephaven.reporting.com.slack.api.methods.response.files.FilesUploadV2Response;
+import io.deephaven.reporting.com.slack.api.model.block.ContextBlock;
+import io.deephaven.reporting.com.slack.api.model.block.LayoutBlock;
+import io.deephaven.reporting.com.slack.api.model.block.SectionBlock;
+import io.deephaven.reporting.com.slack.api.model.block.composition.MarkdownTextObject;
+import io.deephaven.reporting.com.slack.api.model.block.composition.PlainTextObject;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -161,7 +162,7 @@ abstract class SlackMessagePerItemRenderer implements Item.Visitor, Table.Visito
     }
   }
 
-  private com.slack.api.model.File uploadFigureInChannel(Figure<?> figure) {
+  private io.deephaven.reporting.com.slack.api.model.File uploadFigureInChannel(Figure<?> figure) {
     final File file;
     try {
       file = File.createTempFile(figure.name().orElse("figure") + "-", ".png");
@@ -170,18 +171,19 @@ abstract class SlackMessagePerItemRenderer implements Item.Visitor, Table.Visito
     }
 
     figure.walk(SaveFigure.builder().file(file).build());
-
-    final FilesUploadRequest request =
-        FilesUploadRequest.builder()
-            .title(figure.name().orElse(null))
-            .channels(Collections.singletonList(config().channel()))
+    final FilesUploadV2Request request =
+        FilesUploadV2Request.builder()
+            .title(figure.name().orElse(""))
+            .channel(config().channel())
             .filename(file.getName())
             .file(file)
             .build();
 
-    final FilesUploadResponse response;
+    final FilesUploadV2Response response;
     try {
-      response = client().filesUpload(request);
+      response = client().filesUploadV2(request);
+    } catch (SlackFilesUploadV2Exception e) {
+      throw new RuntimeException("Slack error: " + e);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     } catch (SlackApiException e) {

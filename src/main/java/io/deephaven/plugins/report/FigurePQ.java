@@ -62,7 +62,7 @@ public abstract class FigurePQ extends FigureBase<FigurePQ> {
         db.executeConcurrentQuery(ReportFigureCARQ.of(figureName()))
             .inflate(db.getProcessorConnection());
 
-    figure.waitForData();
+    figure.waitForData(log, figure.getFigure());
 
     return ImmutableFigureLocal.builder()
         .figure(figure)

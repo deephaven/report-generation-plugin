@@ -15,8 +15,8 @@
  */
 package io.deephaven.plugins.slack;
 
-import com.slack.api.Slack;
 import io.deephaven.plugins.slack.ClientImpl.LockType;
+import io.deephaven.reporting.com.slack.api.Slack;
 
 public class Functions {
 
